@@ -11,52 +11,52 @@ class BienvenidoScreen extends StatefulWidget {
 
 class _BienvenidoScreenState extends State<BienvenidoScreen> {
   double logoSize = 100.0;
-  
+
   @override
   void initState() {
     super.initState();
     Timer(
-      const Duration(seconds: 10), () => Navigator.pushReplacement(
-        context, 
-        MaterialPageRoute(builder: (context) => const HomeScreen(),),
+      const Duration(seconds: 3),
+      () => Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const HomeScreen(),
+        ),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      
-          width: double.infinity,
-          height: double.infinity,
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        AnimatedContainer(
-          duration: Duration(seconds: 1),
-          curve: Curves.easeInOut,
-          width: double.infinity,
-          height: double.infinity,
-          child: Text('Anabel')
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            AnimatedContainer(
+              duration: const Duration(seconds: 2),
+              curve: Curves.easeInOut,
+              height: 150,
+              width: 150,
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/hola.png'),
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 30,
+            ),
+            const Text(
+              '¡Bienvenido!',
+              style: TextStyle(
+                fontSize: 24.0,
+                fontWeight: FontWeight.bold,
+              ),
+            )
+          ],
         ),
-        SizedBox(height: 25.0),
-        Text(
-          '¡Bienvenida!',
-          style: TextStyle(
-            fontSize: 20.0,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
-    ),
-  );
-    /*Container(
-      color: Colors.white,
-      height: double.infinity,
-      width: double.infinity,
-      child: const Center(
-        child: Text('data'),
       ),
-    );*/
+    );
   }
 }

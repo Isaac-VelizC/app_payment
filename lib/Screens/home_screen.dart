@@ -1,7 +1,9 @@
 import 'package:app_payment/Screens/lista_screen.dart';
+import 'package:app_payment/Widgets/list_new_widget.dart';
 import 'package:app_payment/db/db_helper.dart';
 import 'package:app_payment/db/models/pagos.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,15 +21,25 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _nombreController = TextEditingController();
   final TextEditingController _apellidoController = TextEditingController();
   final TextEditingController _montoController = TextEditingController();
-  DateTime? _fecha;
-  final _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  DateTime now = DateTime.now();
+  String formattedDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+  String formattedTime = DateFormat('kk:mm:ss').format(DateTime.now());
+
+  //DateTime? _fecha;
+
+  TextEditingController _selectController = TextEditingController();
+
+  final List<String> _options = [
+    'Luz',
+    'Agua',
+  ];
 
   @override
   void dispose() {
     _nombreController.dispose();
     _apellidoController.dispose();
     _montoController.dispose();
-    //_facturaController.dispose();
     super.dispose();
   }
 
@@ -35,6 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     dbHelper = DBHelper();
+    _selectController = TextEditingController(text: _options[0]);
     allPagos();
   }
 
@@ -60,39 +73,10 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           Builder(builder: (BuildContext context) {
             return IconButton(
-              icon: const Icon(Icons.more_vert),
+              icon: const Icon(Icons.list),
               onPressed: () {
-                final RenderBox overlay =
-                    Overlay.of(context).context.findRenderObject() as RenderBox;
-                showMenu(
-                  context: context,
-                  position: RelativeRect.fromRect(
-                      Rect.fromPoints(
-                          overlay.localToGlobal(Offset.zero),
-                          overlay.localToGlobal(
-                              overlay.size.bottomLeft(Offset.zero))),
-                      Offset.zero & overlay.size),
-                  items: <PopupMenuEntry>[
-                    PopupMenuItem(
-                      child: ListTile(
-                        leading: const Icon(Icons.delete),
-                        title: const Text('Listar'),
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                                builder: (context) => const ListScreen()),
-                          );
-                        },
-                      ),
-                    ),
-                    PopupMenuItem(
-                      child: ListTile(
-                        leading: const Icon(Icons.edit),
-                        title: const Text('Registrar'),
-                        onTap: () {},
-                      ),
-                    ),
-                  ],
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => const ListScreen()),
                 );
               },
             );
@@ -149,6 +133,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 height: 25,
               ),
               TextFormField(
+                controller: _selectController,
+                readOnly: true,
+                onTap: () {
+                  _showOptionsDialog(context);
+                },
+                decoration: const InputDecoration(
+                  labelText: 'Selecciona un servicio',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(
+                height: 25,
+              ),
+              TextFormField(
                 controller: _montoController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
@@ -164,17 +162,22 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 16.0),
               ListTile(
-                title: Text(_fecha == null
+                title: Text('Fecha y Hora: $formattedDate $formattedTime'),
+                /*title: Text(_fecha == null
                     ? 'Fecha de Pago'
                     : 'Fecha de Pago: ${_fecha!.toString()}'),
                 trailing: const Icon(Icons.calendar_today),
-                onTap: _showDatePicker,
+                onTap: _showDatePicker,*/
               ),
               const SizedBox(height: 16.0),
               ElevatedButton(
                 onPressed: _submitForm,
                 child: const Text('Registrar Pago'),
               ),
+              const SizedBox(height: 40.0),
+              SizedBox(
+                height: 300,
+                child: ListNewWidget(pago: pagos,)),
             ],
           ),
         ),
@@ -182,7 +185,36 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  _showDatePicker() async {
+  void _showOptionsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Selecciona un servicio'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: _options.map((option) {
+                return InkWell(
+                  onTap: () {
+                    setState(() {
+                      _selectController.text = option;
+                    });
+                    Navigator.pop(context);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(option),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  /*_showDatePicker() async {
     final date = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -194,16 +226,15 @@ class _HomeScreenState extends State<HomeScreen> {
         _fecha = date;
       });
     }
-  }
+  }*/
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
-      // Enviar los datos a la base de datos o API
       final nombre = _nombreController.text;
       final apellido = _apellidoController.text;
       final monto = double.parse(_montoController.text);
-      //final factura = _facturaController.text;
-      final fecha = _fecha ?? DateTime.now();
+      final tipo = _selectController.text;
+      final fecha = formattedDate ?? DateTime.now();
       dbHelper.insertPago(
         Pago(
             nombre: nombre,

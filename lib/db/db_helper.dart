@@ -32,7 +32,9 @@ class DBHelper {
       nombre TEXT,
       apellidos TEXT,
       monto REAL,
-      fecha TEXT
+      fecha TEXT,
+      tipo TEXT,
+      estado INTEGER
     )''');
   }
 
