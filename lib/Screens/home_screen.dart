@@ -1,7 +1,10 @@
-import 'package:app_payment/Screens/lista_screen.dart';
-import 'package:app_payment/Widgets/list_new_widget.dart';
+import 'package:app_payment/Screens/inquilino_screen.dart';
+import 'package:app_payment/db/data/servicio.dart';
 import 'package:app_payment/db/db_helper.dart';
+import 'package:app_payment/db/models/inquilinos.dart';
 import 'package:app_payment/db/models/pagos.dart';
+import 'package:app_payment/themes/colors.dart';
+import 'package:app_payment/themes/style_text.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -14,12 +17,11 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late Future<List<Pago>> pagos;
+  late Future<List<Inquilino>> users;
   late DBHelper dbHelper;
   bool _isSearch = false;
 
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _nombreController = TextEditingController();
-  final TextEditingController _apellidoController = TextEditingController();
   final TextEditingController _montoController = TextEditingController();
 
   DateTime now = DateTime.now();
@@ -30,15 +32,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
   TextEditingController _selectController = TextEditingController();
 
-  final List<String> _options = [
-    'Luz',
-    'Agua',
-  ];
+  //List<String> _hobbies = ['Fútbol', 'Música', 'Lectura'];
+  List<bool> _checkedHobbies = [false, false, false];
+
+  void _handleHobbyCheckbox(int index, bool value) {
+    setState(() {
+      _checkedHobbies[index] = value;
+    });
+  }
 
   @override
   void dispose() {
-    _nombreController.dispose();
-    _apellidoController.dispose();
     _montoController.dispose();
     super.dispose();
   }
@@ -47,8 +51,15 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     dbHelper = DBHelper();
-    _selectController = TextEditingController(text: _options[0]);
+    //_selectController = TextEditingController(text: _options[0]);
     allPagos();
+    allInquilinos();
+  }
+
+  allInquilinos() {
+    setState(() {
+      users = dbHelper.getInquilinos();
+    });
   }
 
   allPagos() {
@@ -73,10 +84,11 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           Builder(builder: (BuildContext context) {
             return IconButton(
-              icon: const Icon(Icons.list),
+              icon: const Icon(Icons.people),
               onPressed: () {
                 Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => const ListScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => const InquilinoScreen()),
                 );
               },
             );
@@ -88,127 +100,98 @@ class _HomeScreenState extends State<HomeScreen> {
         scrollDirection: Axis.vertical,
         child: Form(
           key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                'Registrar Pago',
-                style: TextStyle(
-                  fontFamily: 'Pacifico',
-                  fontSize: 32.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blueGrey[800],
+          child: FutureBuilder(
+            future: users,
+            builder: (BuildContext context,
+                AsyncSnapshot<List<Inquilino>?> snapshot) {
+              final user = snapshot.data ?? [];
+              return Container(
+                alignment: Alignment.topCenter,
+                child: Column(
+                  children: [
+                    const StyleText(text: 'Inquilinos', colors: negro),
+                    SizedBox(
+                      height: 270,
+                      child: ListView.builder(
+                        itemCount: user.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          final inquil = user[index];
+                          return ListTile(
+                            title: Text(inquil.nombre),
+                            onTap: () {
+                              _showPaymentDialog(context, inquil);
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16.0),
-              TextFormField(
-                controller: _nombreController,
-                decoration: const InputDecoration(
-                  labelText: 'Nombre',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor ingrese el nombre del cliente';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16.0),
-              TextFormField(
-                controller: _apellidoController,
-                decoration: const InputDecoration(
-                  labelText: 'Apellido',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor ingrese el apellido';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(
-                height: 25,
-              ),
-              TextFormField(
-                controller: _selectController,
-                readOnly: true,
-                onTap: () {
-                  _showOptionsDialog(context);
-                },
-                decoration: const InputDecoration(
-                  labelText: 'Selecciona un servicio',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(
-                height: 25,
-              ),
-              TextFormField(
-                controller: _montoController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Monto',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor ingrese el monto';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16.0),
-              ListTile(
-                title: Text('Fecha y Hora: $formattedDate $formattedTime'),
-                /*title: Text(_fecha == null
-                    ? 'Fecha de Pago'
-                    : 'Fecha de Pago: ${_fecha!.toString()}'),
-                trailing: const Icon(Icons.calendar_today),
-                onTap: _showDatePicker,*/
-              ),
-              const SizedBox(height: 16.0),
-              ElevatedButton(
-                onPressed: _submitForm,
-                child: const Text('Registrar Pago'),
-              ),
-              const SizedBox(height: 40.0),
-              SizedBox(
-                height: 300,
-                child: ListNewWidget(pago: pagos,)),
-            ],
+              );
+            },
           ),
         ),
       ),
     );
   }
 
-  void _showOptionsDialog(BuildContext context) {
+  void _showPaymentDialog(BuildContext context, Inquilino user) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Selecciona un servicio'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: _options.map((option) {
-                return InkWell(
-                  onTap: () {
-                    setState(() {
-                      _selectController.text = option;
-                    });
-                    Navigator.pop(context);
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(option),
-                  ),
-                );
-              }).toList(),
+          title: const Text('Registrar pago'),
+          content: Text('¿Desea registrar el pago para ${user.nombre}?'),
+          actions: <Widget>[
+            const SizedBox(height: 16.0),
+            /*Row(
+              children: servicios.asMap().entries.map((entry) => Row(
+                children: [
+                  Checkbox(value: _checkedHobbies[entry.key], onChanged: (value) {
+                            _handleHobbyCheckbox(entry.key, value ?? false);
+                  }),
+                  Text(entry.value),
+                ],
+              )),
+            ),*/
+            const SizedBox(
+              height: 25,
             ),
-          ),
+            TextFormField(
+              controller: _montoController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Monto',
+                border: OutlineInputBorder(),
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Por favor ingrese el monto';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 16.0),
+            ListTile(
+              title: Text('Fecha y Hora: $formattedDate $formattedTime'),
+              /*title: Text(_fecha == null
+                    ? 'Fecha de Pago'
+                    : 'Fecha de Pago: ${_fecha!.toString()}'),
+                trailing: const Icon(Icons.calendar_today),
+                onTap: _showDatePicker,*/
+            ),
+            const SizedBox(height: 16.0),
+            TextButton(
+              child: Text('Cancelar'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              onPressed: () {}, //_submitForm(user),
+              child: const Text('Registrar Pago'),
+            ),
+          ],
         );
       },
     );
@@ -228,26 +211,25 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }*/
 
-  void _submitForm() {
+  _submitForm(Inquilino user) {
     if (_formKey.currentState!.validate()) {
-      final nombre = _nombreController.text;
-      final apellido = _apellidoController.text;
       final monto = double.parse(_montoController.text);
-      final tipo = _selectController.text;
-      final fecha = formattedDate ?? DateTime.now();
+      final List<int> tipo = _selectController.text as List<int>;
+      final fecha = formattedDate;// ?? DateTime.now();
       dbHelper.insertPago(
         Pago(
-            nombre: nombre,
-            apellidos: apellido,
+            idinquilino: user.id,
             monto: monto,
-            fecha: fecha.toString()),
+            fecha: fecha.toString(),
+            estado: 'A',
+            idservicio: tipo,
+        )
       );
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Registrado'),
         duration: Duration(seconds: 2),
       ));
-      //form.save();
-      _formKey.currentState!.reset();
+      Navigator.of(context).pop();
     }
   }
 }

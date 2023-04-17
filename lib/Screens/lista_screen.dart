@@ -72,7 +72,7 @@ class _ListScreenState extends State<ListScreen> {
                             icon: const Icon(Icons.arrow_back),
                             color: negro,
                           ),
-                          IconButton(
+                          /*IconButton(
                             onPressed: () async {
                               if (await Permission.storage
                                   .request()
@@ -193,7 +193,7 @@ class _ListScreenState extends State<ListScreen> {
                                 ancho: 25,
                                 alto: 25),
                           ),
-                        ],
+                        */],
                       ),
                       Center(
                         child: StyleText(
@@ -208,7 +208,7 @@ class _ListScreenState extends State<ListScreen> {
                 )
               ],
             ),
-            Container(
+            /*Container(
               alignment: Alignment.topCenter,
               padding: EdgeInsets.only(
                 top: MediaQuery.of(context).size.height * barraAltura,
@@ -250,7 +250,7 @@ class _ListScreenState extends State<ListScreen> {
                       ),
                     ),
             ),
-          ]);
+          */]);
         },
       ),
     );
