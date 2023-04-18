@@ -1,10 +1,10 @@
+import 'dart:async';
+
 import 'package:app_payment/Screens/inquilino_screen.dart';
 import 'package:app_payment/db/data/servicio.dart';
 import 'package:app_payment/db/db_helper.dart';
 import 'package:app_payment/db/models/inquilinos.dart';
 import 'package:app_payment/db/models/pagos.dart';
-import 'package:app_payment/themes/colors.dart';
-import 'package:app_payment/themes/style_text.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -20,26 +20,12 @@ class _HomeScreenState extends State<HomeScreen> {
   late Future<List<Inquilino>> users;
   late DBHelper dbHelper;
   bool _isSearch = false;
-
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _montoController = TextEditingController();
-
   DateTime now = DateTime.now();
   String formattedDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
   String formattedTime = DateFormat('kk:mm:ss').format(DateTime.now());
-
   //DateTime? _fecha;
-
-  TextEditingController _selectController = TextEditingController();
-
-  //List<String> _hobbies = ['Fútbol', 'Música', 'Lectura'];
-  List<bool> _checkedHobbies = [false, false, false];
-
-  void _handleHobbyCheckbox(int index, bool value) {
-    setState(() {
-      _checkedHobbies[index] = value;
-    });
-  }
 
   @override
   void dispose() {
@@ -51,7 +37,6 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     dbHelper = DBHelper();
-    //_selectController = TextEditingController(text: _options[0]);
     allPagos();
     allInquilinos();
   }
@@ -72,7 +57,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: _isSearch ? const TextField() : const Text('Anabel Ramos'),
+        title:
+            _isSearch ? const TextField() : const Text('Anabel Ramos Mamani'),
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.search),
@@ -105,28 +91,143 @@ class _HomeScreenState extends State<HomeScreen> {
             builder: (BuildContext context,
                 AsyncSnapshot<List<Inquilino>?> snapshot) {
               final user = snapshot.data ?? [];
-              return Container(
-                alignment: Alignment.topCenter,
-                child: Column(
-                  children: [
-                    const StyleText(text: 'Inquilinos', colors: negro),
-                    SizedBox(
-                      height: 270,
+              return Column(
+                children: [
+                  Text(
+                    'INQUILINOS',
+                    style: TextStyle(
+                      fontFamily: 'Pacifico',
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blueGrey[800],
+                    ),
+                  ),
+                  RefreshIndicator(
+                    color: Colors.red,
+                    onRefresh: () async {
+                      allInquilinos();
+                    },
+                    child: SizedBox(
+                      height: MediaQuery.of(context).size.height,
                       child: ListView.builder(
                         itemCount: user.length,
                         itemBuilder: (BuildContext context, int index) {
                           final inquil = user[index];
                           return ListTile(
-                            title: Text(inquil.nombre),
+                            title: Text('${inquil.nombre} ${inquil.apellidos}'),
                             onTap: () {
-                              _showPaymentDialog(context, inquil);
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Center(
+                                        child: Text('Registrar Pago')),
+                                    content: Text(
+                                        'Registrar el pago de ${inquil.nombre}'),
+                                    actions: [
+                                      Column(
+                                        children: servicios
+                                            .map(
+                                              (option) => CheckboxListTile(
+                                                title: Text(option.tipo),
+                                                value: option.estado,
+                                                onChanged: (value) {
+                                                  setState(() {
+                                                    option.estado =
+                                                        value ?? false;
+                                                  });
+                                                },
+                                              ),
+                                            )
+                                            .toList(),
+                                      ),
+                                      const SizedBox(
+                                        height: 25,
+                                      ),
+                                      TextFormField(
+                                        controller: _montoController,
+                                        keyboardType: TextInputType.number,
+                                        decoration: const InputDecoration(
+                                          labelText: 'Monto',
+                                          border: OutlineInputBorder(),
+                                        ),
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return 'Por favor ingrese el monto';
+                                          }
+                                          return null;
+                                        },
+                                      ),
+                                      const SizedBox(height: 16.0),
+                                      ListTile(
+                                        title: Text(
+                                            'Fecha: $formattedDate $formattedTime'),
+                                        /*title: Text(_fecha == null
+                    ? 'Fecha de Pago'
+                    : 'Fecha de Pago: ${_fecha!.toString()}'),
+                trailing: const Icon(Icons.calendar_today),
+                onTap: _showDatePicker,*/
+                                      ),
+                                      const SizedBox(height: 16.0),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          TextButton(
+                                            child: const Text('Cancelar'),
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                          ),
+                                          ElevatedButton(
+                                            onPressed: () {
+                                              if (_formKey.currentState!
+                                                  .validate()) {
+                                                final monto = double.parse(
+                                                    _montoController.text);
+                                                /*final List<int> tipo =
+                                                _selectController.text
+                                                    as List<int>;
+                                            final fecha =
+                                                formattedDate;*/ // ?? DateTime.now();
+                                                /*dbHelper.insertPago(Pago(
+                                              idinquilino: inquil.id,
+                                              monto: monto,
+                                              fecha: fecha.toString(),
+                                              estado: 'A',
+                                              idservicio: tipo,
+                                            ));*/
+                                                _formKey.currentState!.reset();
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(
+                                                        const SnackBar(
+                                                  content: Text('Registrado'),
+                                                  duration:
+                                                      Duration(seconds: 2),
+                                                ));
+                                                Navigator.of(context).pop();
+                                                Timer(
+                                                    const Duration(seconds: 1),
+                                                    () {
+                                                  _confirmarPrint();
+                                                });
+                                              }
+                                            },
+                                            child: const Text('Registrar'),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
                             },
                           );
                         },
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               );
             },
           ),
@@ -135,61 +236,29 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _showPaymentDialog(BuildContext context, Inquilino user) {
+  _confirmarPrint() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Registrar pago'),
-          content: Text('¿Desea registrar el pago para ${user.nombre}?'),
-          actions: <Widget>[
-            const SizedBox(height: 16.0),
-            /*Row(
-              children: servicios.asMap().entries.map((entry) => Row(
-                children: [
-                  Checkbox(value: _checkedHobbies[entry.key], onChanged: (value) {
-                            _handleHobbyCheckbox(entry.key, value ?? false);
-                  }),
-                  Text(entry.value),
-                ],
-              )),
-            ),*/
-            const SizedBox(
-              height: 25,
-            ),
-            TextFormField(
-              controller: _montoController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Monto',
-                border: OutlineInputBorder(),
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Por favor ingrese el monto';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16.0),
-            ListTile(
-              title: Text('Fecha y Hora: $formattedDate $formattedTime'),
-              /*title: Text(_fecha == null
-                    ? 'Fecha de Pago'
-                    : 'Fecha de Pago: ${_fecha!.toString()}'),
-                trailing: const Icon(Icons.calendar_today),
-                onTap: _showDatePicker,*/
-            ),
-            const SizedBox(height: 16.0),
-            TextButton(
-              child: Text('Cancelar'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            ElevatedButton(
-              onPressed: () {}, //_submitForm(user),
-              child: const Text('Registrar Pago'),
+          title: const Center(child: Text('¿Imprimir Factura?')),
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextButton(
+                  child: const Text('No'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Imprimir'),
+                ),
+              ],
             ),
           ],
         );
@@ -210,26 +279,4 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
   }*/
-
-  _submitForm(Inquilino user) {
-    if (_formKey.currentState!.validate()) {
-      final monto = double.parse(_montoController.text);
-      final List<int> tipo = _selectController.text as List<int>;
-      final fecha = formattedDate;// ?? DateTime.now();
-      dbHelper.insertPago(
-        Pago(
-            idinquilino: user.id,
-            monto: monto,
-            fecha: fecha.toString(),
-            estado: 'A',
-            idservicio: tipo,
-        )
-      );
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Registrado'),
-        duration: Duration(seconds: 2),
-      ));
-      Navigator.of(context).pop();
-    }
-  }
 }

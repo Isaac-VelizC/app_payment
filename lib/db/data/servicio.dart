@@ -5,11 +5,11 @@ final servicios = <Servicio>[
   Servicio(
     id: 1,
     tipo: 'Agua',
-    estado: 'A',
+    estado: false,
   ),
   Servicio(
     id: 2,
     tipo: 'Luz',
-    estado: 'A',
+    estado: false,
   ),
 ];

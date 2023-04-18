@@ -38,31 +38,35 @@ class _InquilinoScreenState extends State<InquilinoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        title: Text(
+          'Registrar Inquilino',
+          style: TextStyle(
+            fontFamily: 'Pacifico',
+            fontSize: 25.0,
+            fontWeight: FontWeight.bold,
+            color: Colors.blueGrey[800],
+          ),
+        ),
+        centerTitle: true,
+      ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         scrollDirection: Axis.vertical,
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text(
-                'Registrar Inquilino',
-                style: TextStyle(
-                  fontFamily: 'Pacifico',
-                  fontSize: 32.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blueGrey[800],
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16.0),
+              const SizedBox(height: 25.0),
               TextFormField(
                 controller: _nombreController,
                 decoration: const InputDecoration(
                   labelText: 'Nombre',
                   border: OutlineInputBorder(),
                 ),
+                textCapitalization: TextCapitalization.sentences,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Por favor ingrese el nombre del cliente';
@@ -73,8 +77,9 @@ class _InquilinoScreenState extends State<InquilinoScreen> {
               const SizedBox(height: 16.0),
               TextFormField(
                 controller: _apellidoController,
+                textCapitalization: TextCapitalization.sentences,
                 decoration: const InputDecoration(
-                  labelText: 'Apellido',
+                  labelText: 'Apellidos',
                   border: OutlineInputBorder(),
                 ),
                 validator: (value) {
@@ -89,6 +94,7 @@ class _InquilinoScreenState extends State<InquilinoScreen> {
               ),
               TextFormField(
                 controller: _direccionController,
+                textCapitalization: TextCapitalization.sentences,
                 decoration: const InputDecoration(
                   labelText: 'Dirección',
                   border: OutlineInputBorder(),
@@ -120,21 +126,22 @@ class _InquilinoScreenState extends State<InquilinoScreen> {
               const SizedBox(height: 16.0),
               TextFormField(
                 controller: _unidadController,
+                textCapitalization: TextCapitalization.sentences,
                 decoration: const InputDecoration(
-                  labelText: 'Descripcion',
+                  labelText: 'Descripción',
                   border: OutlineInputBorder(),
                 ),
-                validator: (value) {
+                /*validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Por favor ingrese una descripción';
                   }
                   return null;
-                },
+                },*/
               ),
               const SizedBox(height: 16.0),
               ElevatedButton(
                 onPressed: _submitForm,
-                child: const Text('Registrar Pago'),
+                child: const Text('Guardar'),
               ),
             ],
           ),
@@ -142,6 +149,7 @@ class _InquilinoScreenState extends State<InquilinoScreen> {
       ),
     );
   }
+
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
       final nombre = _nombreController.text;
@@ -158,12 +166,12 @@ class _InquilinoScreenState extends State<InquilinoScreen> {
             unidad: unidad,
             estado: 'A'),
       );
+    _formKey.currentState!.reset();
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Registrado correctamente'),
         duration: Duration(seconds: 2),
       ));
-      //form.save();
-      _formKey.currentState!.reset();
+
     }
   }
 }

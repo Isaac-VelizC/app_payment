@@ -1,12 +1,12 @@
 class Servicio {
   int? id;
   late String tipo;
-  late String estado;
+  late bool estado;
 
   Servicio({
     this.id,
     required this.tipo,
-    required this.estado,
+    this.estado = false,
   });
 
   Servicio.fromMap(Map<String, dynamic> json) {
