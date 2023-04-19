@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:app_payment/Screens/home_screen.dart';
+import 'package:app_payment/Screens/navegacion_screen.dart';
 import 'package:flutter/material.dart';
 
 class BienvenidoScreen extends StatefulWidget {
@@ -20,7 +21,7 @@ class _BienvenidoScreenState extends State<BienvenidoScreen> {
       () => Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => const HomeScreen(),
+          builder: (context) => const NavegadorScreen(),
         ),
       ),
     );

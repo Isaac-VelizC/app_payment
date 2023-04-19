@@ -49,7 +49,7 @@ class DBHelper {
       idinquilino INTEGER,
       monto REAL,
       fecha TEXT,
-      idservicio INTEGER,
+      idservicio TEXT,
       estado INTEGER
     )''');
   }

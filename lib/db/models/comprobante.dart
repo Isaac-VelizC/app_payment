@@ -1,4 +1,4 @@
-class Pago {
+class Comprobante {
   int? id;
   int? idinquilino;
   late double monto;
@@ -6,7 +6,7 @@ class Pago {
   late String idservicio;
   late String estado;
 
-  Pago({
+  Comprobante({
     this.id,
     required this.idinquilino,
     required this.monto,
@@ -15,7 +15,7 @@ class Pago {
     required this.estado
   });
 
-  Pago.fromMap(Map<String, dynamic> json) {
+  Comprobante.fromMap(Map<String, dynamic> json) {
     id = json['id'];
     idinquilino = json['idinquilino'];
     monto = json['monto'];

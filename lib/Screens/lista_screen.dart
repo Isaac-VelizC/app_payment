@@ -67,11 +67,7 @@ class _ListScreenState extends State<ListScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[
-                          IconButton(
-                            onPressed: () => Navigator.of(context).pop(false),
-                            icon: const Icon(Icons.arrow_back),
-                            color: negro,
-                          ),
+                          Text('hol'),
                           /*IconButton(
                             onPressed: () async {
                               if (await Permission.storage
