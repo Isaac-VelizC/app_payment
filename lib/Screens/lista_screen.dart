@@ -1,11 +1,8 @@
 import 'dart:developer';
 import 'package:app_payment/Screens/print_screen.dart';
-import 'package:flutter/foundation.dart';
 import 'package:app_payment/db/db_helper.dart';
 import 'package:app_payment/db/models/pagos.dart';
 import 'package:app_payment/themes/colors.dart';
-import 'package:app_payment/themes/style_icon.dart';
-import 'package:app_payment/themes/style_text.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -43,12 +40,95 @@ class _ListScreenState extends State<ListScreen> {
     final Orientation orientation = MediaQuery.of(context).orientation;
     final barraAltura = orientation == Orientation.portrait ? .15 : .30;
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.amber,
+        centerTitle: true,
+        title: const Text(
+          'Total: 0',
+          style: TextStyle(
+              color: negro, fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        actions: <Widget>[
+          Builder(builder: (BuildContext context) {
+            return IconButton(
+              icon: const Icon(Icons.document_scanner),
+              onPressed: () {
+                /*Navigator.of(context).push(
+                  MaterialPageRoute(
+                      builder: (context) => const InquilinoScreen()),
+                );*/
+              },
+            );
+          }),
+        ],
+      ),
       body: FutureBuilder(
         future: pagos,
         builder: (BuildContext context, AsyncSnapshot<List<Pago>?> snapshot) {
           final pago = snapshot.data ?? [];
           return Stack(children: <Widget>[
-            Column(
+            Container(
+              alignment: Alignment.topCenter,
+              padding: EdgeInsets.only(
+                top: MediaQuery.of(context).size.height * barraAltura,
+                right: 20.0,
+                left: 20.0,
+              ),
+              child: pago.isEmpty
+                  ? const Center(child: Text('No hay datos'))
+                  : SingleChildScrollView(
+                      scrollDirection: Axis.vertical,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: DataTable(
+                          columns: const [
+                            DataColumn(label: Text('Imprimir')),
+                            DataColumn(label: Text('Nombre Completo')),
+                            DataColumn(label: Text('Monto')),
+                            DataColumn(label: Text('Fecha')),
+                          ],
+                          rows: snapshot.data!
+                              .map((e) => DataRow(cells: [
+                                    DataCell(IconButton(
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) => PrintScreen(
+                                                  data: snapshot.data),
+                                            ),
+                                          );
+                                        },
+                                        icon: const Icon(Icons.print))),
+                                    DataCell(Text('${e.fecha} ${e.monto}')),
+                                    DataCell(Text('${e.monto} Bs.')),
+                                    DataCell(Text(e.fecha.toString())),
+                                  ]))
+                              .toList(),
+                        ),
+                      ),
+                    ),
+            ),
+          ]);
+        },
+      ),
+    );
+  }
+
+  /*buildInvoice() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Factura',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+        ],
+    );
+  }*/
+}
+
+
+/**
+ * Column(
               children: <Widget>[
                 Container(
                   decoration: const BoxDecoration(
@@ -204,61 +284,4 @@ class _ListScreenState extends State<ListScreen> {
                 )
               ],
             ),
-            /*Container(
-              alignment: Alignment.topCenter,
-              padding: EdgeInsets.only(
-                top: MediaQuery.of(context).size.height * barraAltura,
-                right: 20.0,
-                left: 20.0,
-              ),
-              child: pago.isEmpty
-                  ? const Center(child: Text('No hay datos'))
-                  : SingleChildScrollView(
-                      scrollDirection: Axis.vertical,
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: DataTable(
-                          columns: const [
-                            DataColumn(label: Text('Imprimir')),
-                            DataColumn(label: Text('Nombre Completo')),
-                            DataColumn(label: Text('Monto')),
-                            DataColumn(label: Text('Fecha')),
-                          ],
-                          rows: snapshot.data!
-                              .map((e) => DataRow(cells: [
-                                    DataCell(IconButton(
-                                        onPressed: () {
-                                          Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => PrintScreen(data: snapshot.data),
-                        ),
-                      );
-                                        },
-                                        icon: const Icon(Icons.print))),
-                                    DataCell(
-                                        Text('${e.nombre} ${e.apellidos}')),
-                                    DataCell(Text('${e.monto} Bs.')),
-                                    DataCell(Text(e.fecha.toString())),
-                                  ]))
-                              .toList(),
-                        ),
-                      ),
-                    ),
-            ),
-          */]);
-        },
-      ),
-    );
-  }
-
-  /*buildInvoice() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Factura',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-        ],
-    );
-  }*/
-}
+ */

@@ -52,113 +52,112 @@ class _RegisterPagoScreenState extends State<RegisterPagoScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Registrar Pago'),
-        
+        title: const Text('Registrar'),
       ),
-      body: Form(
-        key: _formKey,
-        child: Column(
-          children: [
-            Text('Registrar el pago de ${widget.user.nombre}'),
-            Column(
-              children: List.generate(
-                servicios.length,
-                (index) => CheckboxListTile(
-                  controlAffinity: ListTileControlAffinity.leading,
-                  dense: true,
-                  title: Text(
-                    servicios[index].tipo,
-                    style: const TextStyle(
-                      fontSize: 16.0,
-                      color: Colors.black,
+      body: Container(
+        padding: const EdgeInsets.all(30.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('Registrar el pago de ${widget.user.nombre}'),
+              Column(
+                children: List.generate(
+                  servicios.length,
+                  (index) => CheckboxListTile(
+                    controlAffinity: ListTileControlAffinity.leading,
+                    dense: true,
+                    title: Text(
+                      servicios[index].tipo,
+                      style: const TextStyle(
+                        fontSize: 16.0,
+                        color: Colors.black,
+                      ),
                     ),
+                    value: servicios[index].estado,
+                    onChanged: (value) {
+                      setState(
+                        () {
+                          servicios[index].estado = value!;
+                          if (multipleSelected.contains(servicios[index].tipo)) {
+                            multipleSelected.remove(servicios[index].tipo);
+                          } else {
+                            multipleSelected.add(servicios[index].tipo);
+                          }
+                        },
+                      );
+                    },
                   ),
-                  value: servicios[index].estado,
-                  onChanged: (value) {
-                    setState(
-                      () {
-                        servicios[index].estado = value!;
-                        if (multipleSelected.contains(servicios[index].tipo)) {
-                          multipleSelected.remove(servicios[index].tipo);
-                        } else {
-                          multipleSelected.add(servicios[index].tipo);
-                        }
-                      },
-                    );
-                  },
                 ),
               ),
-            ),
-            Text(
-              multipleSelected.isEmpty ? "" : multipleSelected.toString(),
-              style: const TextStyle(
-                fontSize: 22.0,
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
+              const SizedBox(
+                height: 25,
               ),
-            ),
-            const SizedBox(
-              height: 25,
-            ),
-            TextFormField(
-              controller: _montoController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Monto',
-                border: OutlineInputBorder(),
+              TextFormField(
+                controller: _montoController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Monto',
+                    hintText: 'Ingrese el monto',
+                    prefixIcon: Icon(Icons.money),
+                    hintStyle: TextStyle(fontSize: 15, fontWeight: FontWeight.w100),
+                    labelStyle: TextStyle(fontSize: 13, color: Colors.teal),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor ingrese el monto';
+                  }
+                  return null;
+                },
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Por favor ingrese el monto';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16.0),
-            ListTile(
-              title: Text('Fecha: $formattedDate $formattedTime'),
-              /*title: Text(_fecha == null
-                          ? 'Fecha de Pago'
-                          : 'Fecha de Pago: ${_fecha!.toString()}'),
-                      trailing: const Icon(Icons.calendar_today),
-                      onTap: _showDatePicker,*/
-            ),
-            const SizedBox(height: 16.0),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TextButton(
-                  child: const Text('Cancelar'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      final monto = double.parse(_montoController.text);
-                      final tipo = multipleSelected.isEmpty
-                          ? ""
-                          : multipleSelected.toString();
-                      final fecha = formattedDate; // ?? DateTime.now();
-                      dbHelper.insertPago(Pago(
-                        idinquilino: widget.user.id,
-                        monto: monto,
-                        fecha: fecha.toString(),
-                        estado: 'A',
-                        idservicio: tipo,
-                      ));
-                      Timer(const Duration(seconds: 1), () {
-                        _confirmarPrint();
-                      });
-                      _formKey.currentState!.reset();
-                    }
-                  },
-                  child: const Text('Registrar'),
-                ),
-              ],
-            ),
-          ],
+              const SizedBox(height: 16.0),
+              ListTile(
+                title: Text('Fecha: $formattedDate $formattedTime'),
+                /*title: Text(_fecha == null
+                            ? 'Fecha de Pago'
+                            : 'Fecha de Pago: ${_fecha!.toString()}'),
+                        trailing: const Icon(Icons.calendar_today),
+                        onTap: _showDatePicker,*/
+              ),
+              const SizedBox(height: 16.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextButton(
+                    child: const Text('Cancelar'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        final monto = double.parse(_montoController.text);
+                        final tipo = multipleSelected.isEmpty
+                            ? ""
+                            : multipleSelected.toString();
+                        final fecha = formattedDate; // ?? DateTime.now();
+                        dbHelper.insertPago(Pago(
+                          idinquilino: widget.user.id,
+                          monto: monto,
+                          fecha: fecha.toString(),
+                          estado: 'A',
+                          idservicio: tipo,
+                        ));
+                        Timer(const Duration(seconds: 1), () {
+                          _confirmarPrint();
+                        });
+                        _formKey.currentState!.reset();
+                      }
+                    },
+                    child: const Text('Registrar'),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

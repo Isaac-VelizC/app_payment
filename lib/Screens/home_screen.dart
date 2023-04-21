@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'package:app_payment/Screens/add_pago_screen.dart';
 import 'package:app_payment/Screens/inquilino_screen.dart';
-import 'package:app_payment/Screens/lista_screen.dart';
-import 'package:app_payment/db/data/servicio.dart';
+import 'package:app_payment/Widgets/item_widget.dart';
 import 'package:app_payment/db/db_helper.dart';
 import 'package:app_payment/db/models/inquilinos.dart';
 import 'package:flutter/material.dart';
@@ -16,10 +14,9 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late Future<List<Inquilino>> users;
+  final key = GlobalKey<AnimatedListState>();
   late DBHelper dbHelper;
   bool _isSearch = false;
-  DateTime now = DateTime.now();
-  //DateTime? _fecha;
 
   @override
   void initState() {
@@ -33,13 +30,21 @@ class _HomeScreenState extends State<HomeScreen> {
       users = dbHelper.getInquilinos();
     });
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.amber,
         title:
-            _isSearch ? const TextField() : const Text('Anabel Ramos Mamani'),
+            _isSearch ? const TextField(
+              decoration: InputDecoration(
+                  hintText: 'Ingrese el nombre',
+                  hintStyle: TextStyle(fontSize: 15, fontWeight: FontWeight.w100),
+                  labelStyle: TextStyle(fontSize: 13, color: Colors.teal),
+                
+              ),
+            ) : const Text('Anabel Ramos Mamani'),
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.search),
@@ -63,7 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(12.0),
         scrollDirection: Axis.vertical,
         child: FutureBuilder(
           future: users,
@@ -72,42 +77,24 @@ class _HomeScreenState extends State<HomeScreen> {
             final user = snapshot.data ?? [];
             return Column(
               children: [
-                Text(
-                  'INQUILINOS',
-                  style: TextStyle(
-                    fontFamily: 'Pacifico',
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blueGrey[800],
-                  ),
-                ),
                 RefreshIndicator(
                   color: Colors.red,
                   onRefresh: () async {
                     allInquilinos();
                   },
-                  child: SizedBox(
-                    height: MediaQuery.of(context).size.height,
-                    child: ListView.builder(
-                      itemCount: user.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        final inquil = user[index];
-                        return ListTile(
-                          title: Text('${inquil.nombre} ${inquil.apellidos}'),
-                          onTap: () {
-                            for (var i = 0; i < servicios.length; i++) {
-                              servicios[i].estado = false;
-                            }
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      RegisterPagoScreen(user: inquil)),
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  ),
+                  child: user.isEmpty
+                      ? const Center(
+                          child: Text('No hay Datos'),
+                        )
+                      : SizedBox(
+                          height: MediaQuery.of(context).size.height,
+                          child: AnimatedList(
+                            key: key,
+                            initialItemCount: user.length,
+                            itemBuilder: (context, index, animation) =>
+                                buildItem(user[index], index, animation),
+                          ),
+                        ),
                 ),
               ],
             );
@@ -115,5 +102,13 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  Widget buildItem(item, int index, Animation<double> animation) {
+     return UserItemWidget(
+        item: item,
+        animation: animation,
+        onClicked: () {},
+      );
   }
 }

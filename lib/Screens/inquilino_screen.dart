@@ -64,7 +64,10 @@ class _InquilinoScreenState extends State<InquilinoScreen> {
                 controller: _nombreController,
                 decoration: const InputDecoration(
                   labelText: 'Nombre',
-                  border: OutlineInputBorder(),
+                  hintText: 'Ingrese el nombre',
+                  prefixIcon: Icon(Icons.people),
+                  hintStyle: TextStyle(fontSize: 15, fontWeight: FontWeight.w100),
+                  labelStyle: TextStyle(fontSize: 13, color: Colors.teal),
                 ),
                 textCapitalization: TextCapitalization.sentences,
                 validator: (value) {
@@ -80,7 +83,10 @@ class _InquilinoScreenState extends State<InquilinoScreen> {
                 textCapitalization: TextCapitalization.sentences,
                 decoration: const InputDecoration(
                   labelText: 'Apellidos',
-                  border: OutlineInputBorder(),
+                  hintText: 'Ingrese el apellido',
+                  prefixIcon: Icon(Icons.people_alt),
+                  hintStyle: TextStyle(fontSize: 15, fontWeight: FontWeight.w100),
+                  labelStyle: TextStyle(fontSize: 13, color: Colors.teal),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -97,7 +103,10 @@ class _InquilinoScreenState extends State<InquilinoScreen> {
                 textCapitalization: TextCapitalization.sentences,
                 decoration: const InputDecoration(
                   labelText: 'Dirección',
-                  border: OutlineInputBorder(),
+                  hintText: 'Ingrese la direccion',
+                  prefixIcon: Icon(Icons.add_location),
+                  hintStyle: TextStyle(fontSize: 15, fontWeight: FontWeight.w100),
+                  labelStyle: TextStyle(fontSize: 13, color: Colors.teal),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -114,7 +123,10 @@ class _InquilinoScreenState extends State<InquilinoScreen> {
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
                   labelText: 'Telefono',
-                  border: OutlineInputBorder(),
+                  hintText: 'Ingrese el telefono',
+                  prefixIcon: Icon(Icons.phone),
+                  hintStyle: TextStyle(fontSize: 15, fontWeight: FontWeight.w100),
+                  labelStyle: TextStyle(fontSize: 13, color: Colors.teal),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -129,7 +141,10 @@ class _InquilinoScreenState extends State<InquilinoScreen> {
                 textCapitalization: TextCapitalization.sentences,
                 decoration: const InputDecoration(
                   labelText: 'Descripción',
-                  border: OutlineInputBorder(),
+                  hintText: 'Ingrese el nombre',
+                  prefixIcon: Icon(Icons.description),
+                  hintStyle: TextStyle(fontSize: 15, fontWeight: FontWeight.w100),
+                  labelStyle: TextStyle(fontSize: 13, color: Colors.teal),
                 ),
                 /*validator: (value) {
                   if (value == null || value.isEmpty) {
