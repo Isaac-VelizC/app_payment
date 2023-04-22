@@ -35,6 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: 80,
         backgroundColor: Colors.amber,
         title:
             _isSearch ? const TextField(
@@ -66,6 +67,12 @@ class _HomeScreenState extends State<HomeScreen> {
             );
           }),
         ],
+        elevation: 0,
+        shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          bottom: Radius.circular(38.0),
+        ),
+      ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(12.0),

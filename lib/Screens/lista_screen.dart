@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:app_payment/Screens/print_screen.dart';
 import 'package:app_payment/db/db_helper.dart';
+import 'package:app_payment/db/models/inquilinos.dart';
 import 'package:app_payment/db/models/pagos.dart';
 import 'package:app_payment/themes/colors.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,7 @@ class ListScreen extends StatefulWidget {
 }
 
 class _ListScreenState extends State<ListScreen> {
+  late Future<List<Inquilino>> users;
   late Future<List<Pago>> pagos;
   late DBHelper dbHelper;
   DateTime fecha = DateTime.now();
@@ -26,11 +28,18 @@ class _ListScreenState extends State<ListScreen> {
     super.initState();
     dbHelper = DBHelper();
     allPagos();
+    allInquilinos();
   }
 
   allPagos() {
     setState(() {
       pagos = dbHelper.getPagos();
+    });
+  }
+
+  allInquilinos() {
+    setState(() {
+      users = dbHelper.getInquilinos();
     });
   }
 
@@ -41,12 +50,25 @@ class _ListScreenState extends State<ListScreen> {
     final barraAltura = orientation == Orientation.portrait ? .15 : .30;
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: 80,
         backgroundColor: Colors.amber,
         centerTitle: true,
-        title: const Text(
-          'Total: 0',
-          style: TextStyle(
-              color: negro, fontSize: 20, fontWeight: FontWeight.bold),
+        title: FutureBuilder(
+          future: pagos,
+          builder: (BuildContext context, AsyncSnapshot<List<Pago>?> snapshot) {
+            final pago = snapshot.data ?? [];
+            return Text(
+              'Total: ${pago.length}',
+              style: const TextStyle(
+                  color: negro, fontSize: 20, fontWeight: FontWeight.bold),
+            );
+          },
+        ),
+        elevation: 0,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(38.0),
+          ),
         ),
         actions: <Widget>[
           Builder(builder: (BuildContext context) {
@@ -68,12 +90,6 @@ class _ListScreenState extends State<ListScreen> {
           final pago = snapshot.data ?? [];
           return Stack(children: <Widget>[
             Container(
-              alignment: Alignment.topCenter,
-              padding: EdgeInsets.only(
-                top: MediaQuery.of(context).size.height * barraAltura,
-                right: 20.0,
-                left: 20.0,
-              ),
               child: pago.isEmpty
                   ? const Center(child: Text('No hay datos'))
                   : SingleChildScrollView(
@@ -84,12 +100,15 @@ class _ListScreenState extends State<ListScreen> {
                           columns: const [
                             DataColumn(label: Text('Imprimir')),
                             DataColumn(label: Text('Nombre Completo')),
+                            DataColumn(label: Text('Servicios')),
                             DataColumn(label: Text('Monto')),
                             DataColumn(label: Text('Fecha')),
+                            DataColumn(label: Text('Estado')),
                           ],
                           rows: snapshot.data!
                               .map((e) => DataRow(cells: [
-                                    DataCell(IconButton(
+                                    DataCell(
+                                      IconButton(
                                         onPressed: () {
                                           Navigator.push(
                                             context,
@@ -99,10 +118,24 @@ class _ListScreenState extends State<ListScreen> {
                                             ),
                                           );
                                         },
-                                        icon: const Icon(Icons.print))),
-                                    DataCell(Text('${e.fecha} ${e.monto}')),
+                                        icon: const Icon(Icons.print),
+                                      ),
+                                    ),
+                                    DataCell( //Text('${e.idinquilino}'),
+                                      FutureBuilder(
+                                        future: users,
+                                        builder: (BuildContext context,
+                                            AsyncSnapshot<List<Inquilino>?>
+                                                snapshot) {
+                                          final user = snapshot.data ?? [];
+                                          return Text('${user.map((i) => e.idinquilino == i.id ? i.nombre : '' ).toList()}');
+                                        },
+                                      ),
+                                    ),
+                                    DataCell(Text(e.idservicio)),
                                     DataCell(Text('${e.monto} Bs.')),
                                     DataCell(Text(e.fecha.toString())),
+                                    DataCell(Text(e.estado)),
                                   ]))
                               .toList(),
                         ),

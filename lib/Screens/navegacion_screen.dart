@@ -1,5 +1,7 @@
 import 'package:app_payment/Screens/home_screen.dart';
 import 'package:app_payment/Screens/lista_screen.dart';
+import 'package:app_payment/Screens/profile_screen.dart';
+import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:flutter/material.dart';
 
 class NavegadorScreen extends StatefulWidget {
@@ -27,12 +29,13 @@ class _NavegadorScreenState extends State<NavegadorScreen> {
         children: const [
           HomeScreen(),
           ListScreen(),
+          ProfileScreen(),
         ],
       ),
-      //_screens[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
+      bottomNavigationBar: BottomNavyBar(
+        selectedIndex: _currentIndex,
+        showElevation: false,
+        onItemSelected: (index) {
           setState(() {
             _currentIndex = index;
             _pageController.animateToPage(
@@ -42,14 +45,24 @@ class _NavegadorScreenState extends State<NavegadorScreen> {
             );
           });
         },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
+        items: <BottomNavyBarItem> [
+          BottomNavyBarItem(
+            icon: const Icon(Icons.home),
+            title: const Text('Home'),
+            activeColor: Colors.red,
+            inactiveColor: Colors.green,
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.print),
-            label: 'Comprobante',
+          BottomNavyBarItem(
+            icon: const Icon(Icons.print),
+            title: const Text('Comprobante'),
+            activeColor: Colors.red,
+            inactiveColor: Colors.green
+          ),
+          BottomNavyBarItem(
+            icon: const Icon(Icons.people),
+            title: const Text('Perfil'),
+            activeColor: Colors.red,
+            inactiveColor: Colors.green
           ),
         ],
       ),

@@ -8,6 +8,7 @@ import 'package:app_payment/db/models/pagos.dart';
 import 'package:app_payment/db/models/servicios.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:marquee/marquee.dart';
 
 class RegisterPagoScreen extends StatefulWidget {
   final Inquilino user;
@@ -52,7 +53,30 @@ class _RegisterPagoScreenState extends State<RegisterPagoScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Registrar'),
+        toolbarHeight: 80,
+        elevation: 0,
+        backgroundColor: Colors.amberAccent,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(38.0),
+          ),
+        ),
+        title: SizedBox(
+          height: 50,
+          width: MediaQuery.of(context).size.width,
+          child: Marquee(
+            text: 'Registrar el pago de ${widget.user.nombre}',
+            pauseAfterRound: const Duration(seconds: 3),
+            accelerationDuration: const Duration(seconds: 2),
+            accelerationCurve: Curves.linear,
+            decelerationDuration: const Duration(seconds: 2),
+            decelerationCurve: Curves.easeInOut,
+            scrollAxis: Axis.horizontal,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            blankSpace: 150.0,
+            velocity: 100.0,
+          ),
+        ),
       ),
       body: Container(
         padding: const EdgeInsets.all(30.0),
@@ -62,7 +86,6 @@ class _RegisterPagoScreenState extends State<RegisterPagoScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('Registrar el pago de ${widget.user.nombre}'),
               Column(
                 children: List.generate(
                   servicios.length,
@@ -81,7 +104,8 @@ class _RegisterPagoScreenState extends State<RegisterPagoScreen> {
                       setState(
                         () {
                           servicios[index].estado = value!;
-                          if (multipleSelected.contains(servicios[index].tipo)) {
+                          if (multipleSelected
+                              .contains(servicios[index].tipo)) {
                             multipleSelected.remove(servicios[index].tipo);
                           } else {
                             multipleSelected.add(servicios[index].tipo);
@@ -92,18 +116,16 @@ class _RegisterPagoScreenState extends State<RegisterPagoScreen> {
                   ),
                 ),
               ),
-              const SizedBox(
-                height: 25,
-              ),
               TextFormField(
                 controller: _montoController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
                   labelText: 'Monto',
-                    hintText: 'Ingrese el monto',
-                    prefixIcon: Icon(Icons.money),
-                    hintStyle: TextStyle(fontSize: 15, fontWeight: FontWeight.w100),
-                    labelStyle: TextStyle(fontSize: 13, color: Colors.teal),
+                  hintText: 'Ingrese el monto',
+                  prefixIcon: Icon(Icons.money),
+                  hintStyle:
+                      TextStyle(fontSize: 15, fontWeight: FontWeight.w100),
+                  labelStyle: TextStyle(fontSize: 13, color: Colors.teal),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -116,10 +138,10 @@ class _RegisterPagoScreenState extends State<RegisterPagoScreen> {
               ListTile(
                 title: Text('Fecha: $formattedDate $formattedTime'),
                 /*title: Text(_fecha == null
-                            ? 'Fecha de Pago'
-                            : 'Fecha de Pago: ${_fecha!.toString()}'),
-                        trailing: const Icon(Icons.calendar_today),
-                        onTap: _showDatePicker,*/
+                              ? 'Fecha de Pago'
+                              : 'Fecha de Pago: ${_fecha!.toString()}'),
+                          trailing: const Icon(Icons.calendar_today),
+                          onTap: _showDatePicker,*/
               ),
               const SizedBox(height: 16.0),
               Row(
@@ -146,6 +168,11 @@ class _RegisterPagoScreenState extends State<RegisterPagoScreen> {
                           estado: 'A',
                           idservicio: tipo,
                         ));
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(const SnackBar(
+                          content: Text('Registrado'),
+                          duration: Duration(seconds: 2),
+                        ));
                         Timer(const Duration(seconds: 1), () {
                           _confirmarPrint();
                         });
@@ -162,7 +189,7 @@ class _RegisterPagoScreenState extends State<RegisterPagoScreen> {
       ),
     );
   }
-  
+
   /*_showDatePicker() async {
     final date = await showDatePicker(
       context: context,
@@ -195,15 +222,13 @@ class _RegisterPagoScreenState extends State<RegisterPagoScreen> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    /*Navigator.of(context).push(
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                      PrintScreen(data: data)),
-                              );*/
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text('Registrado'),
-                      duration: Duration(seconds: 2),
-                    ));
+                    /*Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) => PrintScreen(
+                                                  data: snapshot.data),
+                                            ),
+                                          );*/
                   },
                   child: const Text('Imprimir'),
                 ),

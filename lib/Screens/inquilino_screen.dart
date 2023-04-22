@@ -39,7 +39,14 @@ class _InquilinoScreenState extends State<InquilinoScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.yellow,
+        toolbarHeight: 80,
+        elevation: 0,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(38.0),
+          ),
+        ),
         title: Text(
           'Registrar Inquilino',
           style: TextStyle(

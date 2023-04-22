@@ -48,6 +48,8 @@ dependencies:
   syncfusion_flutter_xlsio: ^21.1.39
   intl: ^0.18.0
   flutter_launcher_icons: ^0.13.0
+  marquee: ^2.2.3
+  bottom_navy_bar: ^6.0.0
 
 dev_dependencies:
   flutter_test:
