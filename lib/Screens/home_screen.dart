@@ -17,12 +17,15 @@ class _HomeScreenState extends State<HomeScreen> {
   final key = GlobalKey<AnimatedListState>();
   late DBHelper dbHelper;
   bool _isSearch = false;
+  final TextEditingController _searchController = TextEditingController();
+  late List<Inquilino> _searchResults;
 
   @override
   void initState() {
     super.initState();
     dbHelper = DBHelper();
     allInquilinos();
+    _searchResults = [];
   }
 
   allInquilinos() {
@@ -37,21 +40,31 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         toolbarHeight: 80,
         backgroundColor: Colors.amber,
-        title:
-            _isSearch ? const TextField(
-              decoration: InputDecoration(
-                  hintText: 'Ingrese el nombre',
-                  hintStyle: TextStyle(fontSize: 15, fontWeight: FontWeight.w100),
+        title: _isSearch
+            ? TextField(
+                controller: _searchController,
+                decoration: const InputDecoration(
+                  hintText: 'Ingrese el nombre o apellido',
+                  hintStyle:
+                      TextStyle(fontSize: 15, fontWeight: FontWeight.w100),
                   labelStyle: TextStyle(fontSize: 13, color: Colors.teal),
-                
-              ),
-            ) : const Text('Anabel Ramos Mamani'),
+                ),
+                onChanged: (query) {
+                  dbHelper.searchUsers(query).then((results) {
+                    setState(() {
+                      _searchResults = results;
+                    });
+                  });
+                },
+              )
+            : const Text('Anabel Ramos Mamani'),
         actions: <Widget>[
           IconButton(
-            icon: const Icon(Icons.search),
+            icon: Icon(_isSearch ? Icons.clear : Icons.search),
             onPressed: () {
               setState(() {
                 _isSearch = !_isSearch;
+                _searchResults = [];
               });
             },
           ),
@@ -69,10 +82,10 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
         elevation: 0,
         shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          bottom: Radius.circular(38.0),
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(38.0),
+          ),
         ),
-      ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(12.0),
@@ -82,29 +95,56 @@ class _HomeScreenState extends State<HomeScreen> {
           builder:
               (BuildContext context, AsyncSnapshot<List<Inquilino>?> snapshot) {
             final user = snapshot.data ?? [];
-            return Column(
-              children: [
-                RefreshIndicator(
-                  color: Colors.red,
-                  onRefresh: () async {
-                    allInquilinos();
-                  },
-                  child: user.isEmpty
-                      ? const Center(
-                          child: Text('No hay Datos'),
-                        )
-                      : SizedBox(
-                          height: MediaQuery.of(context).size.height,
-                          child: AnimatedList(
-                            key: key,
-                            initialItemCount: user.length,
-                            itemBuilder: (context, index, animation) =>
-                                buildItem(user[index], index, animation),
+            _searchController.value.text.isEmpty
+                ? _searchResults = []
+                : _searchResults;
+            if (_searchResults.isEmpty &&
+                _searchController.value.text.isEmpty) {
+              return Column(
+                children: [
+                  RefreshIndicator(
+                    color: Colors.red,
+                    onRefresh: () async {
+                      allInquilinos();
+                    },
+                    child: user.isEmpty
+                        ? const Center(
+                            child: Text('No hay Datos'),
+                          )
+                        : SizedBox(
+                            height: MediaQuery.of(context).size.height,
+                            child: AnimatedList(
+                              key: key,
+                              initialItemCount: user.length,
+                              itemBuilder: (context, index, animation) =>
+                                  buildItem(user[index], index, animation),
+                            ),
                           ),
-                        ),
-                ),
-              ],
-            );
+                  ),
+                ],
+              );
+            } else {
+              return _searchResults.isEmpty
+                  ? Center(
+                      child: Text('No se encontro a ${_searchController.value.text}'),
+                    )
+                  : SizedBox(
+                      height: MediaQuery.of(context).size.height,
+                      child: ListView.builder(
+                        itemCount: _searchResults.length,
+                        itemBuilder: (context, index) {
+                          final result = _searchResults[index];
+                          return ListTile(
+                            title: Text(result.nombre),
+                            subtitle: Text(result.apellidos),
+                            onTap: () {
+                              // Navegar a la pantalla de detalles del resultado seleccionado
+                            },
+                          );
+                        },
+                      ),
+                    );
+            }
           },
         ),
       ),
@@ -112,10 +152,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget buildItem(item, int index, Animation<double> animation) {
-     return UserItemWidget(
-        item: item,
-        animation: animation,
-        onClicked: () {},
-      );
+    return UserItemWidget(
+      item: item,
+      animation: animation,
+      onClicked: () {},
+    );
   }
 }

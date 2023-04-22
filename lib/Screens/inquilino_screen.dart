@@ -148,7 +148,7 @@ class _InquilinoScreenState extends State<InquilinoScreen> {
                 textCapitalization: TextCapitalization.sentences,
                 decoration: const InputDecoration(
                   labelText: 'Descripción',
-                  hintText: 'Ingrese el nombre',
+                  hintText: 'Ingrese una descripción',
                   prefixIcon: Icon(Icons.description),
                   hintStyle: TextStyle(fontSize: 15, fontWeight: FontWeight.w100),
                   labelStyle: TextStyle(fontSize: 13, color: Colors.teal),

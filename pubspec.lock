@@ -33,6 +33,38 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.3.0"
+  bonsoir:
+    dependency: "direct main"
+    description:
+      name: bonsoir
+      sha256: d804e89b71da2c32c48a8c0a0c100e746521869429721ffbd61330ee95933836
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
+  bonsoir_android:
+    dependency: transitive
+    description:
+      name: bonsoir_android
+      sha256: "2c089240abba5e1f466f2b6e690b6400fbfe9a446c5233cce4b79de279982909"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0+1"
+  bonsoir_darwin:
+    dependency: transitive
+    description:
+      name: bonsoir_darwin
+      sha256: e6dfa3062cb9dc40cb3b640445a9b1c727677c9e27dc54104b2743e58bd5f80c
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0+3"
+  bonsoir_platform_interface:
+    dependency: transitive
+    description:
+      name: bonsoir_platform_interface
+      sha256: "2f30c5f144309f690f11890e7db52ddc8a4f8a576a1ec9e3761bb430c2b986cd"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0+1"
   boolean_selector:
     dependency: transitive
     description:
@@ -186,10 +218,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_launcher_icons
-      sha256: "8546a9b9510e1a260b8d55fb2d07096e8a8552c6a2c2bf529100344894b2b41a"
+      sha256: "526faf84284b86a4cb36d20a5e45147747b7563d921373d4ee0559c54fcdbcea"
       url: "https://pub.dev"
     source: hosted
-    version: "0.13.0"
+    version: "0.13.1"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -233,7 +265,7 @@ packages:
     source: hosted
     version: "4.0.2"
   image:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: image
       sha256: "483a389d6ccb292b570c31b3a193779b1b0178e7eb571986d9a49904b6861227"

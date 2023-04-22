@@ -3,16 +3,18 @@ class Pago {
   int? idinquilino;
   late double monto;
   late String fecha;
-  late String idservicio;
+  late String servicio;
   late String estado;
+  late String descripcion;
 
   Pago({
     this.id,
     required this.idinquilino,
     required this.monto,
     required this.fecha,
-    required this.idservicio,
-    required this.estado
+    required this.servicio,
+    required this.estado,
+    required this.descripcion
   });
 
   Pago.fromMap(Map<String, dynamic> json) {
@@ -20,8 +22,9 @@ class Pago {
     idinquilino = json['idinquilino'];
     monto = json['monto'];
     fecha = json['fecha'];
-    idservicio = json['idservicio'];
+    servicio = json['servicio'];
     estado = json['estado'];
+    descripcion = json['descripcion'];
   }
 
   Map<String, dynamic> toMap() {
@@ -29,13 +32,14 @@ class Pago {
       'idinquilino': idinquilino,
       'monto': monto,
       'fecha': fecha,
-      'idservicio': idservicio,
-      'estado': estado
+      'servicio': servicio,
+      'estado': estado,
+      'descripcion': descripcion
     };
   }
 
   @override
   String toString() {
-    return 'Pago: $id, idinquilino $idinquilino, monto $monto, fecha $fecha, idservicio $idservicio, estado $estado ';
+    return 'Pago: $id, idinquilino $idinquilino, monto $monto, fecha $fecha, servicio $servicio, estado $estado, descripcion $descripcion ';
   }
 }

@@ -47,9 +47,11 @@ dependencies:
   excel: ^2.1.0
   syncfusion_flutter_xlsio: ^21.1.39
   intl: ^0.18.0
-  flutter_launcher_icons: ^0.13.0
+  flutter_launcher_icons: ^0.13.1
   marquee: ^2.2.3
   bottom_navy_bar: ^6.0.0
+  bonsoir: ^2.0.0
+  image: ^4.0.15
 
 dev_dependencies:
   flutter_test:
