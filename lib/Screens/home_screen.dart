@@ -57,13 +57,30 @@ class _HomeScreenState extends State<HomeScreen> {
                   });
                 },
               )
-            : const Text('Anabel Ramos Mamani'),
+            : const SizedBox(
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 15,
+                      backgroundImage: AssetImage('assets/usuario.png'),
+                    ),
+                    SizedBox(
+                      width: 3,
+                    ),
+                    Text(
+                      'Heydi Anabel Ramos Mamani',
+                      style: TextStyle(fontSize: 17),
+                    ),
+                  ],
+                ),
+              ),
         actions: <Widget>[
           IconButton(
             icon: Icon(_isSearch ? Icons.clear : Icons.search),
             onPressed: () {
               setState(() {
                 _isSearch = !_isSearch;
+                _searchController.clear();
                 _searchResults = [];
               });
             },
@@ -117,33 +134,38 @@ class _HomeScreenState extends State<HomeScreen> {
                               key: key,
                               initialItemCount: user.length,
                               itemBuilder: (context, index, animation) =>
-                                  buildItem(user[index], index, animation),
+                                  buildItem(user[index], index),
                             ),
                           ),
                   ),
                 ],
               );
             } else {
-              return _searchResults.isEmpty
-                  ? Center(
-                      child: Text('No se encontro a ${_searchController.value.text}'),
-                    )
-                  : SizedBox(
-                      height: MediaQuery.of(context).size.height,
-                      child: ListView.builder(
-                        itemCount: _searchResults.length,
-                        itemBuilder: (context, index) {
-                          final result = _searchResults[index];
-                          return ListTile(
-                            title: Text(result.nombre),
-                            subtitle: Text(result.apellidos),
-                            onTap: () {
-                              // Navegar a la pantalla de detalles del resultado seleccionado
-                            },
-                          );
-                        },
-                      ),
-                    );
+              return Column(
+                children: [
+                  RefreshIndicator(
+                    color: Colors.red,
+                    onRefresh: () async {
+                      allInquilinos();
+                    },
+                    child: _searchResults.isEmpty
+                        ? Center(
+                            child: Text(
+                                'No se encontro a ${_searchController.value.text}'),
+                          )
+                        : SizedBox(
+                            height: MediaQuery.of(context).size.height,
+                            child: ListView.builder(
+                              itemCount: _searchResults.length,
+                              itemBuilder: (context, index) {
+                                final result = _searchResults[index];
+                                return buildItem(result, index);
+                              },
+                            ),
+                          ),
+                  ),
+                ],
+              );
             }
           },
         ),
@@ -151,10 +173,9 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget buildItem(item, int index, Animation<double> animation) {
+  Widget buildItem(item, int index) {
     return UserItemWidget(
       item: item,
-      animation: animation,
       onClicked: () {},
     );
   }

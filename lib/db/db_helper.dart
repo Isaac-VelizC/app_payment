@@ -1,5 +1,6 @@
 import 'package:app_payment/db/models/inquilinos.dart';
 import 'package:app_payment/db/models/pagos.dart';
+import 'package:app_payment/db/models/perfil.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'dart:io' as io;
@@ -10,6 +11,7 @@ class DBHelper {
   static const pagosTable = 'Pago';
   static const inquilinoTable = 'Inquilino';
   static const servicioTable = 'Servicio';
+  static const perfilTable = 'Perfil';
   static const tablaId = 'id';
 
   static Database? _db;
@@ -29,6 +31,13 @@ class DBHelper {
   }
 
   _onCreate(Database db, int version) async {
+    await db.execute('''CREATE TABLE $perfilTable(
+      $tablaId INTEGER PRIMARY KEY,
+      nombre TEXT,
+      apellido TEXT,
+      telefono INTEGER NULL,
+      image BLOB
+    )''');
     await db.execute('''CREATE TABLE $inquilinoTable(
       $tablaId INTEGER PRIMARY KEY,
       nombre TEXT,
@@ -52,6 +61,11 @@ class DBHelper {
       estado TEXT,
       descripcion TEXT
     )''');
+    await db.insert(
+      perfilTable,
+      {'id': 1, 'nombre': 'Anabel', 'apellido': 'Ramos', 'telefono': int.parse('00000000'), 'image': 'usuario.png'},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   Future<List<Pago>> getPagos() async {
@@ -122,6 +136,18 @@ class DBHelper {
     var dbClient = await db;
     pago.id = await dbClient.insert(pagosTable, pago.toMap());
     return pago;
+  }
+
+  Future<List<Map<String, dynamic>>> dataPerfil(int id) async {
+    var dbClient = await db;
+    return await dbClient.query(perfilTable, where: 'id = ?', whereArgs: [id]);
+    
+  }
+
+  Future<Perfil> updatePerfil(int id, Perfil perfil) async {
+    var dbClient = await db;
+    perfil.id = await dbClient.update(perfilTable, {'nombre': perfil.nombre, 'apellido': perfil.apellido , 'telefono': perfil.telefono, 'image': perfil.image}, where: 'id = ?', whereArgs: [id]);
+    return perfil;
   }
 
   Future close() async {

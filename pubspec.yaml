@@ -52,6 +52,10 @@ dependencies:
   bottom_navy_bar: ^6.0.0
   bonsoir: ^2.0.0
   image: ^4.0.15
+  image_picker: ^0.8.7+4
+  http: ^0.13.5
+  flutter_screenutil: ^5.7.0
+  connectivity_plus: ^3.0.4
 
 dev_dependencies:
   flutter_test:

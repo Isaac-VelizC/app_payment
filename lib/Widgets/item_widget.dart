@@ -6,12 +6,10 @@ import 'package:marquee/marquee.dart';
 
 class UserItemWidget extends StatelessWidget {
   final Inquilino item;
-  final Animation animation;
   final VoidCallback onClicked;
   const UserItemWidget(
       {super.key,
       required this.item,
-      required this.animation,
       required this.onClicked});
 
   @override
@@ -35,12 +33,14 @@ class UserItemWidget extends StatelessWidget {
         ],
       ),
       child: ListTile(
+        onLongPress: () {
+          print('Presionado');
+        },
         contentPadding:
             const EdgeInsets.symmetric(vertical: 15, horizontal: 5),
         leading: const CircleAvatar(
           radius: 32,
-          backgroundImage: NetworkImage(
-              'https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png'),
+          backgroundImage: AssetImage('assets/usuario.png')
         ),
         title: SizedBox(
           height: 25,

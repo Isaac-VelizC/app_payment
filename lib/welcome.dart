@@ -36,8 +36,8 @@ class _BienvenidoScreenState extends State<BienvenidoScreen> {
             AnimatedContainer(
               duration: const Duration(seconds: 2),
               curve: Curves.easeInOut,
-              height: 150,
-              width: 150,
+              height: 200,
+              width: 200,
               decoration: const BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage('assets/hola.png'),
@@ -45,12 +45,12 @@ class _BienvenidoScreenState extends State<BienvenidoScreen> {
               ),
             ),
             const SizedBox(
-              height: 30,
+              height: 5,
             ),
             const Text(
               '¡Bienvenido!',
               style: TextStyle(
-                fontSize: 24.0,
+                fontSize: 25.0,
                 fontWeight: FontWeight.bold,
               ),
             )

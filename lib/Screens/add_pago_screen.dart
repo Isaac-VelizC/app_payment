@@ -26,7 +26,7 @@ class _RegisterPagoScreenState extends State<RegisterPagoScreen> {
   DateTime now = DateTime.now();
   String formattedDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
   String formattedTime = DateFormat('kk:mm:ss').format(DateTime.now());
-  //DateTime? _fecha;
+  DateTime? _fecha;
   List<dynamic> multipleSelected = [];
 
   @override
@@ -115,6 +115,15 @@ class _RegisterPagoScreenState extends State<RegisterPagoScreen> {
                     ),
                   ),
                 ),
+                const SizedBox(height: 16.0),
+                ListTile(
+                  //title: Text('Fecha: $formattedDate $formattedTime'),
+                  title: Text(_fecha == null
+                      ? 'Fecha de Pago'
+                      : 'Fecha: ${_fecha!.toString()}'),
+                  trailing: const Icon(Icons.calendar_today),
+                  onTap: _showDatePicker,
+                ),
                 TextFormField(
                   controller: _montoController,
                   keyboardType: TextInputType.number,
@@ -132,15 +141,6 @@ class _RegisterPagoScreenState extends State<RegisterPagoScreen> {
                     }
                     return null;
                   },
-                ),
-                const SizedBox(height: 16.0),
-                ListTile(
-                  title: Text('Fecha: $formattedDate $formattedTime'),
-                  /*title: Text(_fecha == null
-                                ? 'Fecha de Pago'
-                                : 'Fecha de Pago: ${_fecha!.toString()}'),
-                            trailing: const Icon(Icons.calendar_today),
-                            onTap: _showDatePicker,*/
                 ),
                 const SizedBox(height: 16.0),
                 TextFormField(
@@ -211,7 +211,7 @@ class _RegisterPagoScreenState extends State<RegisterPagoScreen> {
     );
   }
 
-  /*_showDatePicker() async {
+  _showDatePicker() async {
     final date = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -223,7 +223,7 @@ class _RegisterPagoScreenState extends State<RegisterPagoScreen> {
         _fecha = date;
       });
     }
-  }*/
+  }
 
   _confirmarPrint() {
     showDialog(
