@@ -40,21 +40,22 @@ class _ListScreenState extends State<ListScreen> {
   Widget build(BuildContext context) {
     String nameFile = "/Reportes_$fecha";
     return Scaffold(
+      backgroundColor: fondo1,
       appBar: AppBar(
         toolbarHeight: 80,
-        backgroundColor: Colors.amber,
+        backgroundColor: barra1,
         centerTitle: true,
         title: FutureBuilder<List<Map<String, dynamic>>>(
           future: facturas,
           builder: (context, snapshot) {
             if (!snapshot.hasData) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: CircularProgressIndicator(color: boton2,));
             }
             final fact = snapshot.data ?? [];
             return Text(
               'Total: ${fact.length}',
               style: const TextStyle(
-                  color: negro, fontSize: 20, fontWeight: FontWeight.bold),
+                  color: rosapastel, fontSize: 20, fontWeight: FontWeight.bold),
             );
           },
         ),
@@ -70,7 +71,7 @@ class _ListScreenState extends State<ListScreen> {
               builder: (context, snapshot) {
                 return Builder(builder: (BuildContext context) {
                   return IconButton(
-                    icon: const Icon(Icons.document_scanner),
+                    icon: const Icon(Icons.document_scanner, color: boton2,),
                     onPressed: () async {
                       if (await Permission.storage.request().isGranted) {
                         showDialog(
@@ -215,6 +216,7 @@ class _ListScreenState extends State<ListScreen> {
                             DataColumn(label: Text('Monto')),
                             DataColumn(label: Text('Fecha')),
                             DataColumn(label: Text('Estado')),
+                            DataColumn(label: Text('Tag')),
                           ],
                           rows: snapshot.data!
                               .map((e) => DataRow(cells: [
@@ -224,11 +226,13 @@ class _ListScreenState extends State<ListScreen> {
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (_) => PrintScreen(idPago: e['id'],),
+                                              builder: (_) => PrintScreen(
+                                                idPago: e['id'],
+                                              ),
                                             ),
                                           );
                                         },
-                                        icon: const Icon(Icons.print),
+                                        icon: const Icon(Icons.print, color: boton2,),
                                       ),
                                     ),
                                     DataCell(Text(
@@ -237,6 +241,29 @@ class _ListScreenState extends State<ListScreen> {
                                     DataCell(Text('${e['monto']} Bs.')),
                                     DataCell(Text(e['fecha'].toString())),
                                     DataCell(Text(e['estado'])),
+                                    DataCell(Row(
+                                      children: [
+                                        IconButton(
+                                            onPressed: () {
+                                              dbHelper.eliminarPago(e['id']);
+                                              dbHelper.updateEstadoInquil(e['iduser'], 'A');
+                                              getFacturas();
+                                            },
+                                            icon: const Icon(
+                                              Icons.close,
+                                              color: boton3,
+                                              size: 32,
+                                            )),
+                                        IconButton(
+                                            onPressed: () {
+                                            },
+                                            icon: const Icon(
+                                              Icons.edit,
+                                              color: boton4,
+                                              size: 32,
+                                            )),
+                                      ],
+                                    )),
                                   ]))
                               .toList(),
                         ),

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:app_payment/Screens/navegacion_screen.dart';
+import 'package:app_payment/themes/colors.dart';
 import 'package:flutter/material.dart';
 
 class BienvenidoScreen extends StatefulWidget {
@@ -16,7 +17,7 @@ class _BienvenidoScreenState extends State<BienvenidoScreen> {
   void initState() {
     super.initState();
     Timer(
-      const Duration(seconds: 3),
+      const Duration(seconds: 2),
       () => Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -29,6 +30,7 @@ class _BienvenidoScreenState extends State<BienvenidoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: fondo1,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

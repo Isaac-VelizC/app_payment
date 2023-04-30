@@ -1,3 +1,4 @@
+import 'package:app_payment/themes/colors.dart';
 import 'package:app_payment/welcome.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -28,7 +29,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'App Payment',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: fondo1),
         useMaterial3: true,
       ),
       home: const BienvenidoScreen(),

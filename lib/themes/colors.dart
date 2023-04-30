@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
-
 const negro = Color.fromARGB(255, 0, 0, 0);
 const blanco = Color.fromARGB(255, 255, 255, 255);
-const coralClaro = Color.fromARGB(255, 240, 128, 128);
-const rojoNaranja = Color.fromARGB(255, 255, 69, 0);
-const fondo = Color.fromARGB(255, 39, 188, 238);
-const letras = Color.fromARGB(255, 34, 59, 130);
-const barra = Color.fromARGB(255, 193, 192, 192);
+const barra1 = Color(0xFFffc0cb);
+const rosapastel = Color(0xFF9b4d6b);
+const fondo1 = Color(0xFFffe2e9);
+const fondo2 = Color(0xFFf7d4e6);
+const boton1 = Color(0xFFff869f);
+const boton2 = Color(0xFFC2185B);
+const boton3 = Color(0xFFffa5be);
+const boton4 = Color.fromARGB(255, 158, 114, 226);
+const boton5 = Color(0xFFe5c2d9);
+const boton6 = Color(0xFFf5cfd0);
+const texto1 = Color(0xFF9e9e9e);
+const texto2 = Color(0xFF9E9E9E);
+const grisoscuro = Color(0xFF333333);

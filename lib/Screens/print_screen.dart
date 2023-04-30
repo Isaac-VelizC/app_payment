@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:app_payment/db/db_helper.dart';
+import 'package:app_payment/themes/colors.dart';
 import 'package:bluetooth_print/bluetooth_print_model.dart';
 import 'package:flutter/material.dart';
 import 'package:bluetooth_print/bluetooth_print.dart';
@@ -24,6 +25,7 @@ class _PrintScreenState extends State<PrintScreen> {
   @override
   void initState() {
     super.initState();
+    dbHelper = DBHelper();
     getIdPago();
     WidgetsBinding.instance.addPostFrameCallback((_) => initPrinter());
   }
@@ -70,9 +72,11 @@ class _PrintScreenState extends State<PrintScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: fondo1,
       appBar: AppBar(
-        title: const Text('Seleccione una impresora'),
-        backgroundColor: Colors.redAccent,
+        foregroundColor: boton2,
+        title: const Text('Seleccione una impresora', style: TextStyle(color: rosapastel),),
+        backgroundColor: barra1,
       ),
       body: RefreshIndicator(
         onRefresh: () =>

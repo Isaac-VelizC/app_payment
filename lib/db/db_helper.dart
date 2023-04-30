@@ -1,6 +1,5 @@
 import 'package:app_payment/db/models/inquilinos.dart';
 import 'package:app_payment/db/models/pagos.dart';
-import 'package:app_payment/db/models/perfil.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'dart:io' as io;
@@ -11,7 +10,6 @@ class DBHelper {
   static const pagosTable = 'Pago';
   static const inquilinoTable = 'Inquilino';
   static const servicioTable = 'Servicio';
-  static const perfilTable = 'Perfil';
   static const tablaId = 'id';
 
   static Database? _db;
@@ -31,13 +29,6 @@ class DBHelper {
   }
 
   _onCreate(Database db, int version) async {
-    await db.execute('''CREATE TABLE $perfilTable(
-      $tablaId INTEGER PRIMARY KEY,
-      nombre TEXT,
-      apellido TEXT,
-      telefono INTEGER NULL,
-      image BLOB
-    )''');
     await db.execute('''CREATE TABLE $inquilinoTable(
       $tablaId INTEGER PRIMARY KEY,
       nombre TEXT,
@@ -61,11 +52,6 @@ class DBHelper {
       estado TEXT,
       descripcion TEXT
     )''');
-    await db.insert(
-      perfilTable,
-      {'id': 1, 'nombre': 'Anabel', 'apellido': 'Ramos', 'telefono': int.parse('00000000'), 'image': 'usuario.png'},
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
   }
 
   Future<List<Pago>> getPagos() async {
@@ -101,14 +87,18 @@ class DBHelper {
 
   Future<List<Map<String, dynamic>>> getFactura() async {
     var dbClient = await db;
-    return dbClient.rawQuery('SELECT pa.id, pa.monto, pa.fecha, pa.servicio, pa.estado, pa.descripcion, inquil.nombre, inquil.apellidos '
+    return dbClient.rawQuery(
+        'SELECT pa.id, pa.monto, pa.fecha, pa.servicio, pa.estado, pa.descripcion, inquil.id iduser, inquil.nombre, inquil.apellidos '
         'FROM $pagosTable as pa JOIN $inquilinoTable as inquil ON pa.idinquilino = inquil.id');
   }
 
   Future<List<Map<String, dynamic>>> getFacturaId(int id) async {
     var dbClient = await db;
-    return dbClient.rawQuery('SELECT pa.*, inquil.* '
-        'FROM $pagosTable as pa JOIN $inquilinoTable as inquil ON pa.idinquilino = inquil.id WHERE pa.id = ?', [id],);
+    return dbClient.rawQuery(
+      'SELECT pa.*, inquil.* '
+      'FROM $pagosTable as pa JOIN $inquilinoTable as inquil ON pa.idinquilino = inquil.id WHERE pa.id = ?',
+      [id],
+    );
   }
 
   Future<Inquilino> insertInquilino(Inquilino inquilino) async {
@@ -117,9 +107,27 @@ class DBHelper {
     return inquilino;
   }
 
+  Future<void> updateInquilino(int id, String nombre, String apellido,
+      String direccion, int telefono, String unidad) async {
+    Database db = await this.db;
+    await db.update(
+        inquilinoTable,
+        {
+          'nombre': nombre,
+          'apellidos': apellido,
+          'direccion': direccion,
+          'telefono': telefono,
+          'unidad': unidad
+        },
+        where: "id=?",
+        whereArgs: [id]);
+  }
+
   Future<List<Inquilino>> searchUsers(String query) async {
     var dbClient = await db;
-    final List<Map<String, dynamic>> maps =await dbClient.rawQuery('SELECT * FROM  $inquilinoTable WHERE nombre LIKE ? OR apellidos LIKE ?', ['%$query%', '%$query%']);
+    final List<Map<String, dynamic>> maps = await dbClient.rawQuery(
+        'SELECT * FROM  $inquilinoTable WHERE nombre LIKE ? OR apellidos LIKE ?',
+        ['%$query%', '%$query%']);
     return List.generate(maps.length, (index) {
       return Inquilino(
           id: maps[index]['id'],
@@ -132,22 +140,58 @@ class DBHelper {
     });
   }
 
+  Future<String> eliminarRegistro(int id) async {
+    var dbClient = await db;
+    int result =
+        await dbClient.delete(inquilinoTable, where: 'id = ?', whereArgs: [id]);
+    if (result == 1) {
+      return 'Registro eliminado con éxito';
+    } else {
+      return 'No se encontró ningún registro para eliminar';
+    }
+  }
+
   Future<Pago> insertPago(Pago pago) async {
     var dbClient = await db;
     pago.id = await dbClient.insert(pagosTable, pago.toMap());
     return pago;
   }
 
-  Future<List<Map<String, dynamic>>> dataPerfil(int id) async {
-    var dbClient = await db;
-    return await dbClient.query(perfilTable, where: 'id = ?', whereArgs: [id]);
-    
+  Future<void> update(Pago pago) async {
+    Database db = await this.db;
+    await db
+        .update(pagosTable, pago.toMap(), where: "id=?", whereArgs: [pago.id]);
   }
 
-  Future<Perfil> updatePerfil(int id, Perfil perfil) async {
+  Future<String> eliminarPago(int id) async {
     var dbClient = await db;
-    perfil.id = await dbClient.update(perfilTable, {'nombre': perfil.nombre, 'apellido': perfil.apellido , 'telefono': perfil.telefono, 'image': perfil.image}, where: 'id = ?', whereArgs: [id]);
-    return perfil;
+    int result =
+        await dbClient.delete(pagosTable, where: 'id = ?', whereArgs: [id]);
+    if (result == 1) {
+      return 'Pago eliminado con éxito';
+    } else {
+      return 'No se encontró ningún registro para eliminar';
+    }
+  }
+
+  Future<void> updateEstadoInquil(int id, String estado) async {
+    Database dbClient = await db;
+    await dbClient.update(inquilinoTable, {'estado': estado},
+        where: "id=?", whereArgs: [id]);
+  }
+
+  Future<Map<String, dynamic>> getPagoById(int id) async {
+    final dbClient = await db;
+    List<Map<String, dynamic>> result = await dbClient.query(pagosTable,
+        where: 'idinquilino = ?',
+        whereArgs: [id],
+        orderBy: 'id DESC',
+        limit: 1);
+    if (result.isNotEmpty) {
+      return result.first;
+    } else {
+      return {};
+    }
   }
 
   Future close() async {

@@ -1,40 +1,43 @@
 import 'dart:async';
-import 'package:app_payment/Screens/print_screen.dart';
+
 import 'package:app_payment/db/data/servicio.dart';
 import 'package:app_payment/db/db_helper.dart';
 import 'package:app_payment/db/models/inquilinos.dart';
 import 'package:app_payment/db/models/pagos.dart';
-import 'package:app_payment/themes/colors.dart';
-import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:marquee/marquee.dart';
 
-class RegisterPagoScreen extends StatefulWidget {
+class UpdatePagoScreen extends StatefulWidget {
+  
   final Inquilino user;
-  const RegisterPagoScreen({super.key, required this.user});
+  const UpdatePagoScreen({super.key, required this.user});
 
   @override
-  State<RegisterPagoScreen> createState() => _RegisterPagoScreenState();
+  State<UpdatePagoScreen> createState() => _UpdatePagoScreenState();
 }
 
-class _RegisterPagoScreenState extends State<RegisterPagoScreen> {
+class _UpdatePagoScreenState extends State<UpdatePagoScreen> {
   late Future<List<Pago>> pagos;
   late Future<List<Inquilino>> users;
   late DBHelper dbHelper;
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _montoController = TextEditingController();
-  final TextEditingController _descripcionController = TextEditingController();
+
   DateTime now = DateTime.now();
   String formattedDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
   String formattedTime = DateFormat('kk:mm:ss').format(DateTime.now());
   DateTime? _fecha;
   List<dynamic> multipleSelected = [];
 
+  late Future<Map<String, dynamic>> updatepago;
+
+
+  final TextEditingController _montoController = TextEditingController();
+  final TextEditingController _descripcionController = TextEditingController();
+
+
   @override
   void dispose() {
-    _montoController.dispose();
-    _descripcionController.dispose();
     super.dispose();
   }
 
@@ -43,6 +46,7 @@ class _RegisterPagoScreenState extends State<RegisterPagoScreen> {
     super.initState();
     dbHelper = DBHelper();
     allPagos();
+    getPago();
   }
 
   allPagos() {
@@ -50,22 +54,19 @@ class _RegisterPagoScreenState extends State<RegisterPagoScreen> {
       pagos = dbHelper.getPagos();
     });
   }
-
-  allInquilinos() {
+  getPago() {
     setState(() {
-      users = dbHelper.getInquilinos();
+      updatepago = dbHelper.getPagoById(widget.user.id!);
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: fondo1,
       appBar: AppBar(
         toolbarHeight: 80,
         elevation: 0,
-        backgroundColor: barra1,
-        foregroundColor: boton2,
+        backgroundColor: Colors.amberAccent,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
             bottom: Radius.circular(38.0),
@@ -75,11 +76,7 @@ class _RegisterPagoScreenState extends State<RegisterPagoScreen> {
           height: 50,
           width: MediaQuery.of(context).size.width,
           child: Marquee(
-            text: 'Registrar el pago de ${widget.user.nombre}',
-            style: const TextStyle(
-              fontFamily: 'Pacifico',
-              color: rosapastel,
-            ),
+            text: 'Actualizar el pago de ${widget.user.nombre}',
             pauseAfterRound: const Duration(seconds: 3),
             accelerationDuration: const Duration(seconds: 2),
             accelerationCurve: Curves.linear,
@@ -132,12 +129,9 @@ class _RegisterPagoScreenState extends State<RegisterPagoScreen> {
                 const SizedBox(height: 16.0),
                 ListTile(
                   //title: Text('Fecha: $formattedDate $formattedTime'),
-                  title: Text(
-                    _fecha == null
-                        ? 'Fecha de Pago'
-                        : 'Fecha: ${_fecha!.toString()}',
-                    style: const TextStyle(color: rosapastel),
-                  ),
+                  title: Text(_fecha == null
+                      ? 'Fecha de Pago'
+                      : 'Fecha: ${_fecha!.toString()}'),
                   trailing: const Icon(Icons.calendar_today),
                   onTap: _showDatePicker,
                 ),
@@ -147,13 +141,10 @@ class _RegisterPagoScreenState extends State<RegisterPagoScreen> {
                   decoration: const InputDecoration(
                     labelText: 'Monto',
                     hintText: 'Ingrese el monto',
-                    prefixIcon: Icon(Icons.money, color: boton2),
+                    prefixIcon: Icon(Icons.money),
                     hintStyle:
                         TextStyle(fontSize: 15, fontWeight: FontWeight.w100),
-                    labelStyle: TextStyle(
-                        fontSize: 13,
-                        color: boton4,
-                        fontWeight: FontWeight.bold),
+                    labelStyle: TextStyle(fontSize: 13, color: Colors.teal),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -169,13 +160,10 @@ class _RegisterPagoScreenState extends State<RegisterPagoScreen> {
                   decoration: const InputDecoration(
                     labelText: 'Descripción del Pago',
                     hintText: 'Ingrese una descripción',
-                    prefixIcon: Icon(Icons.description, color: boton2),
+                    prefixIcon: Icon(Icons.description),
                     hintStyle:
                         TextStyle(fontSize: 15, fontWeight: FontWeight.w100),
-                    labelStyle: TextStyle(
-                        fontSize: 13,
-                        color: boton4,
-                        fontWeight: FontWeight.bold),
+                    labelStyle: TextStyle(fontSize: 13, color: Colors.teal),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -184,7 +172,7 @@ class _RegisterPagoScreenState extends State<RegisterPagoScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 30.0),
+                const SizedBox(height: 16.0),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -195,7 +183,7 @@ class _RegisterPagoScreenState extends State<RegisterPagoScreen> {
                       },
                     ),
                     ElevatedButton(
-                      onPressed: () async {
+                      onPressed: () {
                         if (_formKey.currentState!.validate()) {
                           final monto = double.parse(_montoController.text);
                           final tipo = multipleSelected.isEmpty
@@ -203,7 +191,7 @@ class _RegisterPagoScreenState extends State<RegisterPagoScreen> {
                               : multipleSelected.toString();
                           final fecha = formattedDate; // ?? DateTime.now();
                           final descripcion = _descripcionController.text;
-                          Pago ultPago = await dbHelper.insertPago(Pago(
+                          dbHelper.update(Pago(
                             idinquilino: widget.user.id,
                             monto: monto,
                             fecha: fecha.toString(),
@@ -211,22 +199,13 @@ class _RegisterPagoScreenState extends State<RegisterPagoScreen> {
                             servicio: tipo,
                             descripcion: descripcion,
                           ));
-                          dbHelper.updateEstadoInquil(widget.user.id!, 'N');
-                          // ignore: use_build_context_synchronously
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            elevation: 0,
-                            backgroundColor: Colors.transparent,
-                            content: AwesomeSnackbarContent(
-                              color: boton3,
-                              title: 'Registrando',
-                              message: 'El Pago se registro correctamento',
-                              contentType: ContentType.success,
-                            ),
-                            duration: const Duration(seconds: 2),
-                            behavior: SnackBarBehavior.fixed,
+                          ScaffoldMessenger.of(context)
+                              .showSnackBar(const SnackBar(
+                            content: Text('Actualizado'),
+                            duration: Duration(seconds: 2),
                           ));
-                          Timer(const Duration(seconds: 2), () {
-                            _confirmarPrint(ultPago);
+                          Timer(const Duration(seconds: 1), () {
+                            _confirmarPrint();
                           });
                           _formKey.currentState!.reset();
                         }
@@ -257,12 +236,12 @@ class _RegisterPagoScreenState extends State<RegisterPagoScreen> {
     }
   }
 
-  _confirmarPrint(Pago ultPago) {
+  _confirmarPrint() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Center(child: Text('¿Comprobante?')),
+          title: const Center(child: Text('¿Imprimir Factura?')),
           actions: [
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -275,14 +254,14 @@ class _RegisterPagoScreenState extends State<RegisterPagoScreen> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.push(
+                    /*Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => PrintScreen(idPago: ultPago.id!),
+                        builder: (_) => const PrintScreen(idPago: null,),
                       ),
-                    );
+                    );*/
                   },
-                  child: const Text('Comprobante'),
+                  child: const Text('Imprimir'),
                 ),
               ],
             ),
@@ -291,4 +270,5 @@ class _RegisterPagoScreenState extends State<RegisterPagoScreen> {
       },
     );
   }
+
 }

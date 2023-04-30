@@ -3,6 +3,7 @@ import 'package:app_payment/Screens/inquilino_screen.dart';
 import 'package:app_payment/Widgets/item_widget.dart';
 import 'package:app_payment/db/db_helper.dart';
 import 'package:app_payment/db/models/inquilinos.dart';
+import 'package:app_payment/themes/colors.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -37,9 +38,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: fondo1,
       appBar: AppBar(
         toolbarHeight: 80,
-        backgroundColor: Colors.amber,
+        backgroundColor: barra1,
         title: _isSearch
             ? TextField(
                 controller: _searchController,
@@ -47,7 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   hintText: 'Ingrese el nombre o apellido',
                   hintStyle:
                       TextStyle(fontSize: 15, fontWeight: FontWeight.w100),
-                  labelStyle: TextStyle(fontSize: 13, color: Colors.teal),
+                  labelStyle: TextStyle(fontSize: 13, color: texto1),
                 ),
                 onChanged: (query) {
                   dbHelper.searchUsers(query).then((results) {
@@ -57,26 +59,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   });
                 },
               )
-            : const SizedBox(
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 15,
-                      backgroundImage: AssetImage('assets/usuario.png'),
-                    ),
-                    SizedBox(
-                      width: 3,
-                    ),
-                    Text(
-                      'Heydi Anabel Ramos Mamani',
-                      style: TextStyle(fontSize: 17),
-                    ),
-                  ],
-                ),
+            : const Text(
+                'Heydi Anabel Ramos Mamani',
+                style: TextStyle(fontSize: 17, color: rosapastel),
               ),
         actions: <Widget>[
           IconButton(
             icon: Icon(_isSearch ? Icons.clear : Icons.search),
+            color: boton2,
             onPressed: () {
               setState(() {
                 _isSearch = !_isSearch;
@@ -88,6 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Builder(builder: (BuildContext context) {
             return IconButton(
               icon: const Icon(Icons.people),
+              color: boton2,
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
@@ -120,16 +111,22 @@ class _HomeScreenState extends State<HomeScreen> {
               return Column(
                 children: [
                   RefreshIndicator(
-                    color: Colors.red,
+                    color: boton2,
                     onRefresh: () async {
                       allInquilinos();
                     },
                     child: user.isEmpty
                         ? const Center(
-                            child: Text('No hay Datos'),
+                            child: Text(
+                              'No hay Datos',
+                              style: TextStyle(color: rosapastel),
+                            ),
                           )
                         : SizedBox(
-                            height: MediaQuery.of(context).size.height,
+                            height: MediaQuery.of(context).size.height -
+                                MediaQuery.of(context).padding.top -
+                                kToolbarHeight -
+                                kBottomNavigationBarHeight - 56,
                             child: AnimatedList(
                               key: key,
                               initialItemCount: user.length,
@@ -144,17 +141,22 @@ class _HomeScreenState extends State<HomeScreen> {
               return Column(
                 children: [
                   RefreshIndicator(
-                    color: Colors.red,
+                    color: boton2,
                     onRefresh: () async {
                       allInquilinos();
                     },
                     child: _searchResults.isEmpty
                         ? Center(
                             child: Text(
-                                'No se encontro a ${_searchController.value.text}'),
+                              'No se encontro a ${_searchController.value.text}',
+                              style: const TextStyle(color: rosapastel),
+                            ),
                           )
                         : SizedBox(
-                            height: MediaQuery.of(context).size.height,
+                            height: MediaQuery.of(context).size.height -
+                                MediaQuery.of(context).padding.top -
+                                kToolbarHeight -
+                                kBottomNavigationBarHeight - 56,
                             child: ListView.builder(
                               itemCount: _searchResults.length,
                               itemBuilder: (context, index) {
@@ -175,6 +177,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget buildItem(item, int index) {
     return UserItemWidget(
+      dbHelper: dbHelper,
       item: item,
       onClicked: () {},
     );

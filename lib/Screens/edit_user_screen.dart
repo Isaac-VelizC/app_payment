@@ -1,40 +1,35 @@
+import 'package:flutter/material.dart';
 import 'package:app_payment/db/db_helper.dart';
 import 'package:app_payment/db/models/inquilinos.dart';
 import 'package:app_payment/themes/colors.dart';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
-import 'package:flutter/material.dart';
 
-class InquilinoScreen extends StatefulWidget {
-  const InquilinoScreen({super.key});
+class EditUserScreen extends StatefulWidget {
+  final VoidCallback onEditPressed;
+  final Inquilino item;
+  const EditUserScreen(
+      {super.key, required this.item, required this.onEditPressed});
 
   @override
-  State<InquilinoScreen> createState() => _InquilinoScreenState();
+  State<EditUserScreen> createState() => _EditUserScreenState();
 }
 
-class _InquilinoScreenState extends State<InquilinoScreen> {
+class _EditUserScreenState extends State<EditUserScreen> {
   late DBHelper dbHelper;
 
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _nombreController = TextEditingController();
-  final TextEditingController _apellidoController = TextEditingController();
-  final TextEditingController _direccionController = TextEditingController();
-  final TextEditingController _telefonoController = TextEditingController();
-  final TextEditingController _unidadController = TextEditingController();
 
-  @override
-  void dispose() {
-    _nombreController.dispose();
-    _apellidoController.dispose();
-    _direccionController.dispose();
-    _telefonoController.dispose();
-    _unidadController.dispose();
-    super.dispose();
-  }
+  String _nombre = '', _apellido = '', _direccion = '', _telefono = '', _unidad = '';
 
   @override
   void initState() {
     super.initState();
     dbHelper = DBHelper();
+    _nombre = widget.item.nombre;
+    _apellido = widget.item.apellidos;
+    _direccion = widget.item.direccion!;
+    _telefono = widget.item.telefono.toString();
+    _unidad = widget.item.unidad!;
   }
 
   @override
@@ -51,9 +46,9 @@ class _InquilinoScreenState extends State<InquilinoScreen> {
             bottom: Radius.circular(38.0),
           ),
         ),
-        title: const Text(
-          'Registrar Inquilino',
-          style: TextStyle(
+        title: Text(
+          'Actualizar a $_nombre',
+          style: const TextStyle(
             fontFamily: 'Pacifico',
             fontSize: 25.0,
             fontWeight: FontWeight.bold,
@@ -72,7 +67,10 @@ class _InquilinoScreenState extends State<InquilinoScreen> {
             children: <Widget>[
               const SizedBox(height: 25.0),
               TextFormField(
-                controller: _nombreController,
+                initialValue: _nombre,
+                onSaved: (value) {
+                  _nombre = value!;
+                },
                 decoration: const InputDecoration(
                   labelText: 'Nombre',
                   hintText: 'Ingrese el nombre',
@@ -95,7 +93,7 @@ class _InquilinoScreenState extends State<InquilinoScreen> {
               ),
               const SizedBox(height: 16.0),
               TextFormField(
-                controller: _apellidoController,
+                initialValue: _apellido,
                 textCapitalization: TextCapitalization.sentences,
                 decoration: const InputDecoration(
                   labelText: 'Apellidos',
@@ -115,12 +113,15 @@ class _InquilinoScreenState extends State<InquilinoScreen> {
                   }
                   return null;
                 },
+                onSaved: (value) {
+                  _apellido = value!;
+                },
               ),
               const SizedBox(
                 height: 25,
               ),
               TextFormField(
-                controller: _direccionController,
+                initialValue: _direccion,
                 textCapitalization: TextCapitalization.sentences,
                 decoration: const InputDecoration(
                   labelText: 'Dirección',
@@ -140,12 +141,15 @@ class _InquilinoScreenState extends State<InquilinoScreen> {
                   }
                   return null;
                 },
+                onSaved: (value) {
+                  _direccion = value!;
+                },
               ),
               const SizedBox(
                 height: 25,
               ),
               TextFormField(
-                controller: _telefonoController,
+                initialValue: _telefono,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
                   labelText: 'Telefono',
@@ -165,10 +169,13 @@ class _InquilinoScreenState extends State<InquilinoScreen> {
                   }
                   return null;
                 },
+                onSaved: (value) {
+                  _telefono = value!;
+                },
               ),
               const SizedBox(height: 16.0),
               TextFormField(
-                controller: _unidadController,
+                initialValue: _unidad,
                 textCapitalization: TextCapitalization.sentences,
                 decoration: const InputDecoration(
                   labelText: 'Descripción',
@@ -182,31 +189,16 @@ class _InquilinoScreenState extends State<InquilinoScreen> {
                   labelStyle: TextStyle(
                       fontSize: 13, color: boton4, fontWeight: FontWeight.bold),
                 ),
-                /*validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor ingrese una descripción';
-                  }
-                  return null;
-                },*/
+                onSaved: (value) {
+                  _unidad = value!;
+                },
               ),
               const SizedBox(height: 30.0),
               ElevatedButton(
                 onPressed: () {
                   _submitForm();
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    elevation: 0,
-                    backgroundColor: Colors.transparent,
-                    content: AwesomeSnackbarContent(
-                      color: boton3,
-                      title: 'Registro',
-                      message: 'El Inquilino se registro correctamento',
-                      contentType: ContentType.success,
-                    ),
-                    duration: const Duration(seconds: 3),
-                    behavior: SnackBarBehavior.fixed,
-                  ));
                 },
-                child: const Text('Guardar'),
+                child: const Text('Actualizar'),
               ),
             ],
           ),
@@ -217,21 +209,22 @@ class _InquilinoScreenState extends State<InquilinoScreen> {
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
-      final nombre = _nombreController.text;
-      final apellido = _apellidoController.text;
-      final direccion = _direccionController.text;
-      final telefono = int.parse(_telefonoController.text);
-      final unidad = _unidadController.text;
-      dbHelper.insertInquilino(
-        Inquilino(
-            nombre: nombre,
-            apellidos: apellido,
-            direccion: direccion,
-            telefono: telefono,
-            unidad: unidad,
-            estado: 'A'),
-      );
-      _formKey.currentState!.reset();
+      _formKey.currentState!.save();
+      dbHelper.updateInquilino(widget.item.id!, _nombre, _apellido, _direccion,
+          int.parse(_telefono), _unidad);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        content: AwesomeSnackbarContent(
+          color: boton3,
+          title: 'Actualizando',
+          message: 'Datos actualizados correctamento',
+          contentType: ContentType.success,
+        ),
+        duration: const Duration(seconds: 3),
+        behavior: SnackBarBehavior.fixed,
+      ));
+      Navigator.popUntil(context, (route) => route.isFirst);
     }
   }
 }

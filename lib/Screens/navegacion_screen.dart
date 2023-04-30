@@ -1,6 +1,7 @@
 import 'package:app_payment/Screens/home_screen.dart';
 import 'package:app_payment/Screens/lista_screen.dart';
 import 'package:app_payment/Screens/profile_screen.dart';
+import 'package:app_payment/themes/colors.dart';
 import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:flutter/material.dart';
 
@@ -19,6 +20,7 @@ class _NavegadorScreenState extends State<NavegadorScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: fondo1,
       body: PageView(
         controller: _pageController,
         onPageChanged: (index) {
@@ -33,6 +35,7 @@ class _NavegadorScreenState extends State<NavegadorScreen> {
         ],
       ),
       bottomNavigationBar: BottomNavyBar(
+        backgroundColor: fondo1,
         selectedIndex: _currentIndex,
         showElevation: false,
         onItemSelected: (index) {
@@ -49,20 +52,20 @@ class _NavegadorScreenState extends State<NavegadorScreen> {
           BottomNavyBarItem(
             icon: const Icon(Icons.home),
             title: const Text('Home'),
-            activeColor: Colors.red,
-            inactiveColor: Colors.green,
+            activeColor: boton2,
+            inactiveColor: boton1,
           ),
           BottomNavyBarItem(
             icon: const Icon(Icons.print),
             title: const Text('Comprobante'),
-            activeColor: Colors.red,
-            inactiveColor: Colors.green
+            activeColor: boton2,
+            inactiveColor: boton1
           ),
           BottomNavyBarItem(
             icon: const Icon(Icons.people),
             title: const Text('Perfil'),
-            activeColor: Colors.red,
-            inactiveColor: Colors.green
+            activeColor: boton2,
+            inactiveColor: boton1
           ),
         ],
       ),
