@@ -5,6 +5,7 @@ import 'package:app_payment/db/db_helper.dart';
 import 'package:app_payment/db/models/inquilinos.dart';
 import 'package:app_payment/themes/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:syncfusion_flutter_xlsio/xlsio.dart' as x;
@@ -48,9 +49,6 @@ class _ListScreenState extends State<ListScreen> {
         title: FutureBuilder<List<Map<String, dynamic>>>(
           future: facturas,
           builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              return const Center(child: CircularProgressIndicator(color: boton2,));
-            }
             final fact = snapshot.data ?? [];
             return Text(
               'Total: ${fact.length}',
@@ -71,7 +69,12 @@ class _ListScreenState extends State<ListScreen> {
               builder: (context, snapshot) {
                 return Builder(builder: (BuildContext context) {
                   return IconButton(
-                    icon: const Icon(Icons.document_scanner, color: boton2,),
+                    icon: SvgPicture.asset(
+                      'assets/icons/export.svg',
+                      color: boton2,
+                      height: 32,
+                      width: 32,
+                    ),
                     onPressed: () async {
                       if (await Permission.storage.request().isGranted) {
                         showDialog(
@@ -210,12 +213,10 @@ class _ListScreenState extends State<ListScreen> {
                         scrollDirection: Axis.horizontal,
                         child: DataTable(
                           columns: const [
-                            DataColumn(label: Text('Imprimir')),
+                            DataColumn(label: Text('Factura')),
                             DataColumn(label: Text('Nombre Completo')),
-                            DataColumn(label: Text('Servicios')),
-                            DataColumn(label: Text('Monto')),
                             DataColumn(label: Text('Fecha')),
-                            DataColumn(label: Text('Estado')),
+                            DataColumn(label: Text('Monto')),
                             DataColumn(label: Text('Tag')),
                           ],
                           rows: snapshot.data!
@@ -232,36 +233,43 @@ class _ListScreenState extends State<ListScreen> {
                                             ),
                                           );
                                         },
-                                        icon: const Icon(Icons.print, color: boton2,),
+                                        icon: SvgPicture.asset(
+                                          'assets/icons/factura.svg',
+                                          color: boton2,
+                                          height: 30,
+                                          width: 30,
+                                        ),
                                       ),
                                     ),
                                     DataCell(Text(
                                         '${e['nombre']} ${e['apellidos']}')),
-                                    DataCell(Text(e['servicio'])),
-                                    DataCell(Text('${e['monto']} Bs.')),
                                     DataCell(Text(e['fecha'].toString())),
-                                    DataCell(Text(e['estado'])),
+                                    DataCell(Text('${e['monto']} Bs.')),
                                     DataCell(Row(
                                       children: [
                                         IconButton(
-                                            onPressed: () {
-                                              dbHelper.eliminarPago(e['id']);
-                                              dbHelper.updateEstadoInquil(e['iduser'], 'A');
-                                              getFacturas();
-                                            },
-                                            icon: const Icon(
-                                              Icons.close,
-                                              color: boton3,
-                                              size: 32,
-                                            )),
+                                          onPressed: () {
+                                            dbHelper.eliminarPago(e['id']);
+                                            dbHelper.updateEstadoInquil(
+                                                e['iduser'], 'A');
+                                            getFacturas();
+                                          },
+                                          icon: SvgPicture.asset(
+                                            'assets/icons/borrar.svg',
+                                            color: boton3,
+                                            height: 30,
+                                            width: 30,
+                                          ),
+                                        ),
                                         IconButton(
-                                            onPressed: () {
-                                            },
-                                            icon: const Icon(
-                                              Icons.edit,
-                                              color: boton4,
-                                              size: 32,
-                                            )),
+                                          onPressed: () {},
+                                          icon: SvgPicture.asset(
+                                            'assets/icons/editar.svg',
+                                            color: boton4,
+                                            height: 30,
+                                            width: 30,
+                                          ),
+                                        ),
                                       ],
                                     )),
                                   ]))

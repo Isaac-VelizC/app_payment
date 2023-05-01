@@ -57,6 +57,10 @@ dependencies:
   flutter_screenutil: ^5.7.0
   connectivity_plus: ^3.0.4
   awesome_snackbar_content: ^0.1.1
+  google_fonts: ^4.0.4
+  share_plus: ^6.3.4
+  url_launcher: ^6.1.10
+  gallery_saver: ^2.3.2
 
 dev_dependencies:
   flutter_test:

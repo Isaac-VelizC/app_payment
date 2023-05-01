@@ -1,5 +1,6 @@
 import 'package:app_payment/db/models/inquilinos.dart';
 import 'package:app_payment/db/models/pagos.dart';
+import 'package:app_payment/db/models/perfil.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'dart:io' as io;
@@ -92,14 +93,38 @@ class DBHelper {
         'FROM $pagosTable as pa JOIN $inquilinoTable as inquil ON pa.idinquilino = inquil.id');
   }
 
-  Future<List<Map<String, dynamic>>> getFacturaId(int id) async {
+  /*Future<List<Map<String, dynamic>>> getFacturaId(int id) async {
     var dbClient = await db;
     return dbClient.rawQuery(
       'SELECT pa.*, inquil.* '
       'FROM $pagosTable as pa JOIN $inquilinoTable as inquil ON pa.idinquilino = inquil.id WHERE pa.id = ?',
       [id],
     );
+  }*/
+
+  Future<Comprobante> getFacturaId(int userId)async{
+  var dbClient = await db;
+  List<Map<String, dynamic>> user = await dbClient.rawQuery(
+      'SELECT pa.*, inquil.* '
+      'FROM $pagosTable as pa JOIN $inquilinoTable as inquil ON pa.idinquilino = inquil.id WHERE pa.id = ?',
+      [userId],
+    );
+  if(user.length == 1){
+    return Comprobante(
+        id: user[0]["id"],
+        nombre: user[0]["nombre"],
+        apellido: user[0]["apellidos"],
+        direccion: user[0]["direccion"],
+        estado: user[0]["estado"],
+        monto: user[0]["monto"],
+        fecha: user[0]["fecha"],
+        servicio: user[0]["servicio"],
+        estadoPago: user[0]["estado"],
+        descripcion: user[0]["descripcion"]);
+  } else {
+    return Comprobante();
   }
+}
 
   Future<Inquilino> insertInquilino(Inquilino inquilino) async {
     var dbClient = await db;

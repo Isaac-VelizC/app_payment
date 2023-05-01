@@ -1,10 +1,18 @@
-import 'dart:convert';
+import 'dart:io';
+import 'dart:ui' as ui;
 import 'package:app_payment/db/db_helper.dart';
+import 'package:app_payment/db/models/perfil.dart';
 import 'package:app_payment/themes/colors.dart';
-import 'package:bluetooth_print/bluetooth_print_model.dart';
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
-import 'package:bluetooth_print/bluetooth_print.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:gallery_saver/gallery_saver.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:share_plus/share_plus.dart';
 
 class PrintScreen extends StatefulWidget {
   final int idPago;
@@ -15,19 +23,59 @@ class PrintScreen extends StatefulWidget {
 }
 
 class _PrintScreenState extends State<PrintScreen> {
-  late Future<List<Map<String, dynamic>>> printer;
-  BluetoothPrint bluetoothPrint = BluetoothPrint.instance;
-  bool _connected = false;
-  BluetoothDevice? _device;
-  String tips = 'no device connect';
+  final GlobalKey _globalKey = GlobalKey();
+  late Future<Comprobante> printer;
   late DBHelper dbHelper;
+
+  Future<String> _capturePantalla() async {
+    RenderRepaintBoundary boundary =
+        _globalKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+    ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+    ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    Uint8List pngBytes = byteData!.buffer.asUint8List();
+
+    var status = await Permission.storage.request();
+    if (status.isDenied) {
+      // Si el usuario rechaza los permisos, muestra un mensaje de error
+      return 'Error: el usuario rechazó los permisos';
+    }
+    // Guarda la imagen en la galería
+    File imageFile = await _saveImage(pngBytes);
+    await _shareImage(imageFile);
+    return 'Se guardo el Comprobante en Galeria';
+  }
+
+  Future<File> _saveImage(Uint8List bytes) async {
+    final directory = await getApplicationDocumentsDirectory();
+    String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+    File file = File('${directory.path}/$fileName.png');
+    await file.writeAsBytes(bytes);
+    await GallerySaver.saveImage(file.path);
+    return file;
+  }
+
+  Future<void> _shareImage(File imageFile) async {
+    List<String> paths = [imageFile.path];
+    // ignore: deprecated_member_use
+    await Share.shareFiles(
+      paths,
+      text: 'Compartir imagen',
+      subject: 'Imagen compartida',
+      mimeTypes: ['image/png'],
+    );
+  }
+
+  String imprimirFechaHoraActual() {
+    DateTime now = DateTime.now();
+    String formattedDateTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
+    return formattedDateTime;
+  }
 
   @override
   void initState() {
     super.initState();
     dbHelper = DBHelper();
     getIdPago();
-    WidgetsBinding.instance.addPostFrameCallback((_) => initPrinter());
   }
 
   getIdPago() {
@@ -36,300 +84,222 @@ class _PrintScreenState extends State<PrintScreen> {
     });
   }
 
-  Future<void> initPrinter() async {
-    bluetoothPrint.startScan(timeout: const Duration(seconds: 4));
-
-    bool isConnected = await bluetoothPrint.isConnected ?? false;
-    bluetoothPrint.state.listen((state) {
-      print('*************************: $state');
-      switch (state) {
-        case BluetoothPrint.CONNECTED:
-          setState(() {
-            _connected = true;
-            tips = 'Conexion Exitosa';
-          });
-          break;
-        case BluetoothPrint.DISCONNECTED:
-          setState(() {
-            _connected = false;
-            tips = 'Desconexion Exitosa';
-          });
-          break;
-        default:
-          break;
-      }
-    });
-
-    if (!mounted) return;
-
-    if (isConnected) {
-      setState(() {
-        _connected = true;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: fondo1,
       appBar: AppBar(
-        foregroundColor: boton2,
-        title: const Text('Seleccione una impresora', style: TextStyle(color: rosapastel),),
-        backgroundColor: barra1,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.of(context).popUntil((route) => route.isFirst);
+          },
+        ),
       ),
-      body: RefreshIndicator(
-        onRefresh: () =>
-            bluetoothPrint.startScan(timeout: const Duration(seconds: 4)),
-        child: SingleChildScrollView(
-          child: Column(
-            children: <Widget>[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                    child: Text(tips),
-                  )
-                ],
-              ),
-              const Divider(),
-              StreamBuilder<List<BluetoothDevice>>(
-                stream: bluetoothPrint.scanResults,
-                initialData: [],
-                builder: (context, snapshot) => Column(
-                  children: snapshot.data!
-                      .map(
-                        (d) => ListTile(
-                          title: Text(d.name ?? ''),
-                          subtitle: Text(d.address ?? ''),
-                          onTap: () {
-                            setState(() async {
-                              _device = d;
-                            });
-                          },
-                          trailing:
-                              _device != null && _device!.address == d.address
-                                  ? Icon(
-                                      Icons.check,
-                                      color: Colors.green,
-                                    )
-                                  : null,
+      body: FutureBuilder<Comprobante>(
+          future: printer,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              Comprobante comprobante = snapshot.data!;
+              String texto =
+                  comprobante.servicio!.replaceAll('[', '').replaceAll(']', '');
+              return RepaintBoundary(
+                key: _globalKey,
+                child: Container(
+                  margin: const EdgeInsets.all(30.0),
+                  child: Column(
+                    children: [
+                      Container(
+                        height: 200,
+                        width: double.infinity,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          image: DecorationImage(
+                            image: AssetImage('assets/8575273.png'),
+                            fit: BoxFit.cover,
+                          ),
                         ),
-                      )
-                      .toList(),
+                      ),
+                      const SizedBox(height: 30.0),
+                      Text(
+                        'COMPROBANTE',
+                        style: GoogleFonts.castoro(
+                            fontSize: 25, fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        imprimirFechaHoraActual(),
+                        style: GoogleFonts.castoro(
+                            fontSize: 15, fontWeight: FontWeight.w100),
+                      ),
+                      const Divider(
+                        height: 50.0,
+                        color: negro,
+                        indent: 20,
+                        endIndent: 20,
+                        thickness: 2,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'De:',
+                            style: GoogleFonts.acme(
+                                fontSize: 15, fontWeight: FontWeight.w900),
+                          ),
+                          Text(
+                            'Heydi Anabel Ramos Mamani',
+                            style: GoogleFonts.acme(
+                                fontSize: 15, fontWeight: FontWeight.w100),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 15.0),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Para:',
+                            style: GoogleFonts.acme(
+                                fontSize: 15, fontWeight: FontWeight.w900),
+                          ),
+                          Text(
+                            '${comprobante.nombre} ${comprobante.apellido}',
+                            style: GoogleFonts.acme(
+                                fontSize: 15, fontWeight: FontWeight.w100),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 15.0),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Fecha de pago:',
+                            style: GoogleFonts.acme(
+                                fontSize: 15, fontWeight: FontWeight.w900),
+                          ),
+                          Text(
+                            comprobante.fecha!,
+                            style: GoogleFonts.acme(
+                                fontSize: 15, fontWeight: FontWeight.w100),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 15.0),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Monto:',
+                            style: GoogleFonts.acme(
+                                fontSize: 15, fontWeight: FontWeight.w900),
+                          ),
+                          Text(
+                            '${comprobante.monto} Bs.',
+                            style: GoogleFonts.acme(
+                                fontSize: 15, fontWeight: FontWeight.w100),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 15.0),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Servicios:',
+                            style: GoogleFonts.acme(
+                                fontSize: 15, fontWeight: FontWeight.w900),
+                          ),
+                          Text(
+                            texto,
+                            style: GoogleFonts.acme(
+                                fontSize: 15, fontWeight: FontWeight.w100),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 15.0),
+                      Text(
+                        'Descripción:',
+                        style: GoogleFonts.acme(
+                            fontSize: 15, fontWeight: FontWeight.w900),
+                      ),
+                      Text(
+                        '${comprobante.descripcion}',
+                        style: GoogleFonts.acme(
+                            fontSize: 15, fontWeight: FontWeight.w100),
+                      ),
+                      const Divider(
+                        height: 50.0,
+                        color: negro,
+                        thickness: 2,
+                        indent: 20,
+                        endIndent: 20,
+                      ),
+                      Text(
+                        'GRACIAS!!!',
+                        style: GoogleFonts.castoro(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const Divider(),
-              Container(
-                padding: const EdgeInsets.fromLTRB(20, 5, 20, 10),
+              );
+            } else if (snapshot.hasError) {
+              return Center(
                 child: Column(
-                  children: <Widget>[
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        OutlinedButton(
-                          onPressed: _connected
-                              ? null
-                              : () async {
-                                  if (_device != null &&
-                                      _device!.address != null) {
-                                    setState(() {
-                                      tips = 'Conectando...';
-                                    });
-                                    await bluetoothPrint.connect(_device!);
-                                  } else {
-                                    setState(() {
-                                      tips =
-                                          'Por favor seleccione un dispositivo';
-                                    });
-                                  }
-                                },
-                          child: const Text('Conectar'),
-                        ),
-                        const SizedBox(
-                          width: 10.0,
-                        ),
-                        OutlinedButton(
-                          onPressed: _connected
-                              ? () async {
-                                  setState(() {
-                                    tips = 'Desconectado....';
-                                  });
-                                  await bluetoothPrint.disconnect();
-                                }
-                              : null,
-                          child: const Text('Desconectado'),
-                        ),
-                      ],
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      size: 100,
+                      color: rosapastel,
                     ),
-                    const Divider(),
-                    OutlinedButton(
-                      onPressed: _connected
-                          ? () async {
-                              Map<String, dynamic> config = Map();
-                              List<LineText> list = [];
-                              list.add(LineText(
-                                  type: LineText.TYPE_TEXT,
-                                  content:
-                                      '**********************************************',
-                                  weight: 1,
-                                  align: LineText.ALIGN_CENTER,
-                                  linefeed: 1));
-                              list.add(LineText(
-                                  type: LineText.TYPE_TEXT,
-                                  content: '打印单据头',
-                                  weight: 1,
-                                  align: LineText.ALIGN_CENTER,
-                                  fontZoom: 2,
-                                  linefeed: 1));
-                              list.add(LineText(linefeed: 1));
-                              list.add(LineText(
-                                  type: LineText.TYPE_TEXT,
-                                  content: '物资名称规格型号',
-                                  align: LineText.ALIGN_LEFT,
-                                  y: 0,
-                                  relativeX: 0,
-                                  linefeed: 0));
-                              list.add(LineText(
-                                  type: LineText.TYPE_TEXT,
-                                  content: '单位',
-                                  align: LineText.ALIGN_LEFT,
-                                  y: 350,
-                                  relativeX: 0,
-                                  linefeed: 0));
-                              list.add(LineText(
-                                  type: LineText.TYPE_TEXT,
-                                  content: '数量',
-                                  align: LineText.ALIGN_LEFT,
-                                  y: 500,
-                                  relativeX: 0,
-                                  linefeed: 1));
-
-                              list.add(LineText(
-                                  type: LineText.TYPE_TEXT,
-                                  content: '混凝土C30',
-                                  align: LineText.ALIGN_LEFT,
-                                  y: 0,
-                                  relativeX: 0,
-                                  linefeed: 0));
-                              list.add(LineText(
-                                  type: LineText.TYPE_TEXT,
-                                  content: '吨',
-                                  align: LineText.ALIGN_LEFT,
-                                  y: 350,
-                                  relativeX: 0,
-                                  linefeed: 0));
-                              list.add(LineText(
-                                  type: LineText.TYPE_TEXT,
-                                  content: '12.0',
-                                  align: LineText.ALIGN_LEFT,
-                                  y: 500,
-                                  relativeX: 0,
-                                  linefeed: 1));
-
-                              list.add(LineText(
-                                  type: LineText.TYPE_TEXT,
-                                  content:
-                                      '**********************************************',
-                                  weight: 1,
-                                  align: LineText.ALIGN_CENTER,
-                                  linefeed: 1));
-                              list.add(LineText(linefeed: 1));
-
-                              ByteData data = await rootBundle.load("");
-                              List<int> imageBytes = data.buffer.asUint8List(
-                                  data.offsetInBytes, data.lengthInBytes);
-                              String base64Image = base64Encode(imageBytes);
-
-                              await bluetoothPrint.printReceipt(config, list);
-                            }
-                          : null,
-                      child: const Text('Imprimir'),
+                    const SizedBox(height: 30),
+                    const Text(
+                      'Ocurrió un error',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                          color: boton3),
                     ),
-                    OutlinedButton(
-                      onPressed: _connected
-                          ? () async {
-                              Map<String, dynamic> config = Map();
-                              config['width'] = 40;
-                              config['height'] = 70;
-                              config['gap'] = 2;
-
-                              List<LineText> list = [];
-
-                              list.add(LineText(
-                                  type: LineText.TYPE_TEXT,
-                                  x: 10,
-                                  y: 10,
-                                  content: 'A Title'));
-                              list.add(LineText(
-                                  type: LineText.TYPE_TEXT,
-                                  x: 10,
-                                  y: 40,
-                                  content: 'this is content'));
-                              list.add(LineText(
-                                  type: LineText.TYPE_QRCODE,
-                                  x: 10,
-                                  y: 70,
-                                  content: 'qrcode i\n'));
-                              list.add(LineText(
-                                  type: LineText.TYPE_BARCODE,
-                                  x: 10,
-                                  y: 190,
-                                  content: 'qrcode i\n'));
-
-                              List<LineText> list1 = [];
-                              ByteData data = await rootBundle.load("");
-                              List<int> imageBytes = data.buffer.asUint8List(
-                                  data.offsetInBytes, data.lengthInBytes);
-                              String base64Image = base64Encode(imageBytes);
-                              list1.add(LineText(
-                                type: LineText.TYPE_IMAGE,
-                                x: 10,
-                                y: 10,
-                                content: base64Image,
-                              ));
-
-                              await bluetoothPrint.printLabel(config, list);
-                              await bluetoothPrint.printLabel(config, list1);
-                            }
-                          : null,
-                      child: const Text('Imprimir Etiquetas'),
+                    const SizedBox(height: 10),
+                    const Text(
+                      'Error al cargar los datos',
+                      style: TextStyle(fontSize: 16, color: boton3),
                     ),
-                    OutlinedButton(
-                      onPressed: _connected
-                          ? () async {
-                              await bluetoothPrint.printTest();
-                            }
-                          : null,
-                      child: const Text('autodiagnóstico de impresión'),
+                    const SizedBox(height: 30),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Volver'),
                     ),
                   ],
                 ),
-              )
-            ],
-          ),
-        ),
-      ),
-      floatingActionButton: StreamBuilder<bool>(
-        stream: bluetoothPrint.isScanning,
-        initialData: false,
-        builder: (c, snapshot) {
-          if (snapshot.data == true) {
-            return FloatingActionButton(
-              child: Icon(Icons.stop),
-              onPressed: () => bluetoothPrint.stopScan(),
-              backgroundColor: Colors.red,
-            );
-          } else {
-            return FloatingActionButton(
-              child: Icon(Icons.search),
-              onPressed: () => bluetoothPrint.startScan(
-                timeout: const Duration(seconds: 4),
-              ),
-            );
-          }
+              );
+            } else {
+              return const Center(child: CircularProgressIndicator());
+            }
+          }),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          String mensaje = await _capturePantalla();
+          // ignore: use_build_context_synchronously
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            elevation: 0,
+            backgroundColor: Colors.transparent,
+            content: AwesomeSnackbarContent(
+              color: boton3,
+              title: 'Guardando...',
+              message: mensaje,
+              contentType: ContentType.success,
+            ),
+            duration: const Duration(seconds: 3),
+            behavior: SnackBarBehavior.fixed,
+          ));
         },
+        child: const Icon(Icons.download),
       ),
     );
   }

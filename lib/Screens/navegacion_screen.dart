@@ -4,6 +4,7 @@ import 'package:app_payment/Screens/profile_screen.dart';
 import 'package:app_payment/themes/colors.dart';
 import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class NavegadorScreen extends StatefulWidget {
   const NavegadorScreen({super.key});
@@ -50,20 +51,35 @@ class _NavegadorScreenState extends State<NavegadorScreen> {
         },
         items: <BottomNavyBarItem> [
           BottomNavyBarItem(
-            icon: const Icon(Icons.home),
+            icon: SvgPicture.asset(
+                'assets/icons/home.svg',
+                color: boton2,
+                height: 30,
+                width: 30,
+              ),
             title: const Text('Home'),
             activeColor: boton2,
             inactiveColor: boton1,
           ),
           BottomNavyBarItem(
-            icon: const Icon(Icons.print),
-            title: const Text('Comprobante'),
+            icon: SvgPicture.asset(
+                'assets/icons/lista.svg',
+                color: boton2,
+                height: 30,
+                width: 30,
+              ),
+            title: const Text('Listado'),
             activeColor: boton2,
             inactiveColor: boton1
           ),
           BottomNavyBarItem(
-            icon: const Icon(Icons.people),
-            title: const Text('Perfil'),
+            icon: SvgPicture.asset(
+                'assets/icons/ajustes.svg',
+                color: boton2,
+                height: 30,
+                width: 30,
+              ),
+            title: const Text('Ajustes'),
             activeColor: boton2,
             inactiveColor: boton1
           ),

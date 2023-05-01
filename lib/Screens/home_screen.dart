@@ -5,6 +5,7 @@ import 'package:app_payment/db/db_helper.dart';
 import 'package:app_payment/db/models/inquilinos.dart';
 import 'package:app_payment/themes/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -65,8 +66,12 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
         actions: <Widget>[
           IconButton(
-            icon: Icon(_isSearch ? Icons.clear : Icons.search),
-            color: boton2,
+            icon: SvgPicture.asset(
+              _isSearch ? 'assets/icons/x.svg' : 'assets/icons/search.svg',
+              color: boton2,
+              height: 25,
+              width: 25,
+            ),
             onPressed: () {
               setState(() {
                 _isSearch = !_isSearch;
@@ -77,8 +82,12 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           Builder(builder: (BuildContext context) {
             return IconButton(
-              icon: const Icon(Icons.people),
-              color: boton2,
+              icon: SvgPicture.asset(
+                'assets/icons/add.svg',
+                color: boton2,
+                height: 25,
+                width: 25,
+              ),
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
@@ -126,7 +135,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             height: MediaQuery.of(context).size.height -
                                 MediaQuery.of(context).padding.top -
                                 kToolbarHeight -
-                                kBottomNavigationBarHeight - 56,
+                                kBottomNavigationBarHeight -
+                                56,
                             child: AnimatedList(
                               key: key,
                               initialItemCount: user.length,
@@ -156,7 +166,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             height: MediaQuery.of(context).size.height -
                                 MediaQuery.of(context).padding.top -
                                 kToolbarHeight -
-                                kBottomNavigationBarHeight - 56,
+                                kBottomNavigationBarHeight -
+                                56,
                             child: ListView.builder(
                               itemCount: _searchResults.length,
                               itemBuilder: (context, index) {
