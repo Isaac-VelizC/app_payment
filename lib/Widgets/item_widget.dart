@@ -108,10 +108,10 @@ class UserItemWidget extends StatelessWidget {
                       builder: (context) => RegisterPagoScreen(user: item)),
                 )
               : item.estado == 'P'
-                  ? Navigator.of(context).push(
+                  ? Text('update') /*Navigator.of(context).push(
                       MaterialPageRoute(
                           builder: (context) => UpdatePagoScreen(user: item)),
-                    )
+                    )*/
                   : onClicked;
         },
       ),

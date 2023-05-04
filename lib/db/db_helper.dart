@@ -1,9 +1,11 @@
+import 'package:app_payment/db/models/comprobante.dart';
 import 'package:app_payment/db/models/inquilinos.dart';
 import 'package:app_payment/db/models/pagos.dart';
 import 'package:app_payment/db/models/perfil.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'dart:io' as io;
+// ignore: depend_on_referenced_packages
 import 'package:path/path.dart';
 
 class DBHelper {
@@ -11,6 +13,7 @@ class DBHelper {
   static const pagosTable = 'Pago';
   static const inquilinoTable = 'Inquilino';
   static const servicioTable = 'Servicio';
+  static const perfilTable = 'Perfil';
   static const tablaId = 'id';
 
   static Database? _db;
@@ -53,6 +56,28 @@ class DBHelper {
       estado TEXT,
       descripcion TEXT
     )''');
+    await db.execute('''CREATE TABLE $perfilTable(
+      $tablaId INTEGER PRIMARY KEY,
+      nombre INTEGER,
+      imagen BLOB NULL
+    )''');
+    await db.rawInsert(
+      'INSERT INTO $perfilTable(id, nombre, imagen) VALUES (?, ?, ?)',
+      [1, 'Sin Nombre', 'none.jpg'],
+    );
+  }
+
+  Future<Perfil> getPerfilId() async {
+    var dbClient = await db;
+    List<Map<String, dynamic>> user = await dbClient.rawQuery('SELECT * FROM $perfilTable WHERE id = 1');
+    if (user.length == 1) {
+      return Perfil(
+          id: user[0]["id"],
+          nombre: user[0]["nombre"],
+          imagen: user[0]["imagen"]);
+    } else {
+      return Perfil(nombre: user[0]["nombre"]);
+    }
   }
 
   Future<List<Pago>> getPagos() async {
@@ -93,38 +118,29 @@ class DBHelper {
         'FROM $pagosTable as pa JOIN $inquilinoTable as inquil ON pa.idinquilino = inquil.id');
   }
 
-  /*Future<List<Map<String, dynamic>>> getFacturaId(int id) async {
+  Future<Comprobante> getFacturaId(int userId) async {
     var dbClient = await db;
-    return dbClient.rawQuery(
-      'SELECT pa.*, inquil.* '
-      'FROM $pagosTable as pa JOIN $inquilinoTable as inquil ON pa.idinquilino = inquil.id WHERE pa.id = ?',
-      [id],
-    );
-  }*/
-
-  Future<Comprobante> getFacturaId(int userId)async{
-  var dbClient = await db;
-  List<Map<String, dynamic>> user = await dbClient.rawQuery(
+    List<Map<String, dynamic>> user = await dbClient.rawQuery(
       'SELECT pa.*, inquil.* '
       'FROM $pagosTable as pa JOIN $inquilinoTable as inquil ON pa.idinquilino = inquil.id WHERE pa.id = ?',
       [userId],
     );
-  if(user.length == 1){
-    return Comprobante(
-        id: user[0]["id"],
-        nombre: user[0]["nombre"],
-        apellido: user[0]["apellidos"],
-        direccion: user[0]["direccion"],
-        estado: user[0]["estado"],
-        monto: user[0]["monto"],
-        fecha: user[0]["fecha"],
-        servicio: user[0]["servicio"],
-        estadoPago: user[0]["estado"],
-        descripcion: user[0]["descripcion"]);
-  } else {
-    return Comprobante();
+    if (user.length == 1) {
+      return Comprobante(
+          id: user[0]["id"],
+          nombre: user[0]["nombre"],
+          apellido: user[0]["apellidos"],
+          direccion: user[0]["direccion"],
+          estado: user[0]["estado"],
+          monto: user[0]["monto"],
+          fecha: user[0]["fecha"],
+          servicio: user[0]["servicio"],
+          estadoPago: user[0]["estado"],
+          descripcion: user[0]["descripcion"]);
+    } else {
+      return Comprobante();
+    }
   }
-}
 
   Future<Inquilino> insertInquilino(Inquilino inquilino) async {
     var dbClient = await db;
@@ -203,6 +219,11 @@ class DBHelper {
     Database dbClient = await db;
     await dbClient.update(inquilinoTable, {'estado': estado},
         where: "id=?", whereArgs: [id]);
+  }
+
+  Future<void> updatePerfil(String nombre) async {
+    Database dbClient = await db;
+    await dbClient.update(perfilTable, {'nombre': nombre}, where: "id=?", whereArgs: [1]);
   }
 
   Future<Map<String, dynamic>> getPagoById(int id) async {

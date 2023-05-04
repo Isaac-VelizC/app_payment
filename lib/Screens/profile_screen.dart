@@ -1,5 +1,8 @@
+import 'package:app_payment/db/db_helper.dart';
+import 'package:app_payment/db/models/perfil.dart';
 import 'package:app_payment/themes/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -9,9 +12,25 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  bool _notificationsEnabled = true;
+  final _formKey = GlobalKey<FormState>();
+  late DBHelper dbHelper;
+  late Future<Perfil> perfil;
   bool _autoSyncEnabled = true;
   bool _darkModeEnabled = false;
+  String _nombre = '', _imagen = '';
+
+  @override
+  void initState() {
+    super.initState();
+    dbHelper = DBHelper();
+    getIdPerfil();
+  }
+
+  getIdPerfil() {
+    setState(() {
+      perfil = dbHelper.getPerfilId();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,55 +59,196 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       body: ListView(
         children: [
-          SwitchListTile(
-            title: Text('Notifications'),
-            subtitle: Text('Enable push notifications'),
-            value: _notificationsEnabled,
-            onChanged: (value) {
-              setState(() {
-                _notificationsEnabled = value;
-              });
-            },
+          FutureBuilder<Perfil>(
+              future: perfil,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  Perfil perfil = snapshot.data!;
+                  _nombre = perfil.nombre;
+                  _imagen = perfil.imagen!;
+                  return Container(
+                    margin: const EdgeInsets.symmetric(vertical: 30),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 10),
+                    decoration: const BoxDecoration(color: fondo2, boxShadow: [
+                      BoxShadow(
+                          color: barra1,
+                          spreadRadius: 1,
+                          blurRadius: 5,
+                          offset: Offset(0, 7)),
+                    ]),
+                    child: SizedBox(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const CircleAvatar(
+                            radius: 30,
+                            backgroundImage: AssetImage('assets/bros.png'),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              perfil.nombre,
+                              style: const TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold, color: rosapastel,),
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Text('Editar información'),
+                                    content: Form(
+                                      key: _formKey,
+                                      child: TextFormField(
+                                        initialValue: _nombre,
+                                        onSaved: (value) {
+                                          _nombre = value!;
+                                        },
+                                        decoration: const InputDecoration(
+                                          labelText: 'Nombre',
+                                          hintText: 'Ingrese su Nombre Completo',
+                                          prefixIcon: Icon(
+                                            Icons.people,
+                                            color: boton2,
+                                          ),
+                                          hintStyle: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w100),
+                                          labelStyle: TextStyle(
+                                              fontSize: 13,
+                                              color: boton4,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                        textCapitalization:
+                                            TextCapitalization.sentences,
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            return 'Por favor ingrese su nombre';
+                                          }
+                                          return null;
+                                        },
+                                      ),
+                                    ),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        child: const Text('Cancelar'),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                      ),
+                                      TextButton(
+                                        child: const Text('Guardar'),
+                                        onPressed: () {
+                                          _submitForm();
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                            icon: SvgPicture.asset(
+                              'assets/icons/editar.svg',
+                              color: boton4,
+                              height: 25,
+                              width: 25,
+                            ),
+                            color: boton2,
+                          )
+                        ],
+                      ),
+                    ),
+                  );
+                } else if (snapshot.hasError) {
+                  return Container(
+                    margin: const EdgeInsets.symmetric(vertical: 30),
+                    color: Colors.red,
+                    child: const Center(
+                      child: Text('Ocurrio un Error'),
+                    ),
+                  );
+                } else {
+                  return const Center(child: CircularProgressIndicator());
+                }
+              }),
+          Container(
+            margin: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(18), color: boton6),
+            child: SwitchListTile(
+              title: const Text('Modo Oscuro'),
+              subtitle: const Text('Habilitar modo oscuro'),
+              value: _darkModeEnabled,
+              onChanged: (value) {
+                setState(() {
+                  _darkModeEnabled = value;
+                });
+              },
+            ),
           ),
-          SwitchListTile(
-            title: Text('Auto-sync'),
-            subtitle: Text('Automatically sync data'),
-            value: _autoSyncEnabled,
-            onChanged: (value) {
-              setState(() {
-                _autoSyncEnabled = value;
-              });
-            },
+          Container(
+            margin: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(18), color: boton6),
+            child: SwitchListTile(
+              title: const Text('Modo Oscuro'),
+              subtitle: const Text('Habilitar modo oscuro'),
+              value: _autoSyncEnabled,
+              onChanged: (value) {
+                setState(() {
+                  _autoSyncEnabled = value;
+                });
+              },
+            ),
           ),
-          SwitchListTile(
-            title: Text('Dark mode'),
-            subtitle: Text('Enable dark mode'),
-            value: _darkModeEnabled,
-            onChanged: (value) {
-              setState(() {
-                _darkModeEnabled = value;
-              });
-            },
+          Container(
+            margin: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(18), color: boton6),
+            child: ListTile(
+              leading: Icon(Icons.info),
+              title: Text('Acerca de'),
+              subtitle: Text('Información sobre la aplicación'),
+              trailing: Icon(Icons.arrow_forward_ios),
+              onTap: () {
+                // Navegar a la pantalla de información sobre la aplicación
+              },
+            ),
           ),
-          ListTile(
-            title: Text('Account'),
-            leading: Icon(Icons.account_circle),
-            onTap: () {
-              // Navigate to account settings screen
-            },
+          const Divider(
+            indent: 35,
+            endIndent: 35,
+            color: texto1,
+            thickness: 2,
           ),
-          Divider(),
-          ListTile(
-            leading: Icon(Icons.info),
-            title: Text('Acerca de'),
-            subtitle: Text('Información sobre la aplicación'),
-            trailing: Icon(Icons.arrow_forward_ios),
-            onTap: () {
-              // Navegar a la pantalla de información sobre la aplicación
-            },
+          Container(
+            margin: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(18), color: boton6),
+            child: ListTile(
+              leading: Icon(Icons.info),
+              title: Text('Acerca de'),
+              subtitle: Text('Información sobre la aplicación'),
+              trailing: Icon(Icons.arrow_forward_ios),
+              onTap: () {
+                // Navegar a la pantalla de información sobre la aplicación
+              },
+            ),
           ),
         ],
       ),
     );
+  }
+  void _submitForm() {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+      dbHelper.updatePerfil(_nombre);
+      Navigator.of(context).pop();
+      getIdPerfil();
+    }
   }
 }

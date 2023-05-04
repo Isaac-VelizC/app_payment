@@ -44,6 +44,7 @@ class EditDeleteModal extends StatelessWidget {
           ElevatedButton(
             onPressed: () async {
               String mensaje = await dbHelper.eliminarRegistro(item.id!);
+              // ignore: use_build_context_synchronously
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                 elevation: 0,
                 backgroundColor: Colors.transparent,

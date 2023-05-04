@@ -3,6 +3,7 @@ import 'package:app_payment/Screens/inquilino_screen.dart';
 import 'package:app_payment/Widgets/item_widget.dart';
 import 'package:app_payment/db/db_helper.dart';
 import 'package:app_payment/db/models/inquilinos.dart';
+import 'package:app_payment/db/models/perfil.dart';
 import 'package:app_payment/themes/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -16,6 +17,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late Future<List<Inquilino>> users;
+  late Future<Perfil> perfil;
   final key = GlobalKey<AnimatedListState>();
   late DBHelper dbHelper;
   bool _isSearch = false;
@@ -33,6 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
   allInquilinos() {
     setState(() {
       users = dbHelper.getInquilinos();
+      perfil = dbHelper.getPerfilId();
     });
   }
 
@@ -60,10 +63,24 @@ class _HomeScreenState extends State<HomeScreen> {
                   });
                 },
               )
-            : const Text(
-                'Heydi Anabel Ramos Mamani',
-                style: TextStyle(fontSize: 17, color: rosapastel),
-              ),
+            :  FutureBuilder<Perfil>(
+              future: perfil,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  Perfil perfil = snapshot.data!;
+                return Text(
+                    perfil.nombre,
+                    style: const TextStyle(fontSize: 17, color: rosapastel),
+                  );
+                } else if (snapshot.hasError) {
+                  return const Center(
+                    child: Text('Errooorrr......'),
+                  );
+                } else {
+                  return const Center(child: CircularProgressIndicator());
+                }
+              }
+            ),
         actions: <Widget>[
           IconButton(
             icon: SvgPicture.asset(

@@ -50,16 +50,9 @@ dependencies:
   flutter_launcher_icons: ^0.13.1
   marquee: ^2.2.3
   bottom_navy_bar: ^6.0.0
-  bonsoir: ^2.0.0
-  image: ^4.0.15
-  image_picker: ^0.8.7+4
-  http: ^0.13.5
-  flutter_screenutil: ^5.7.0
-  connectivity_plus: ^3.0.4
   awesome_snackbar_content: ^0.1.1
   google_fonts: ^4.0.4
   share_plus: ^6.3.4
-  url_launcher: ^6.1.10
   gallery_saver: ^2.3.2
 
 dev_dependencies:

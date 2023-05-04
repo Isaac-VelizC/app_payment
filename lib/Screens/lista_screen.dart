@@ -1,8 +1,10 @@
 import 'dart:developer';
 import 'dart:typed_data';
 import 'package:app_payment/Screens/print_screen.dart';
+import 'package:app_payment/Screens/update_pago_screen.dart';
 import 'package:app_payment/db/db_helper.dart';
 import 'package:app_payment/db/models/inquilinos.dart';
+import 'package:app_payment/db/models/pagos.dart';
 import 'package:app_payment/themes/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -206,7 +208,11 @@ class _ListScreenState extends State<ListScreen> {
           return Stack(children: <Widget>[
             Container(
               child: fact.isEmpty
-                  ? const Center(child: Text('No hay datos'))
+                  ? const Center(
+                      child: Text(
+                      'No hay datos',
+                      style: TextStyle(color: rosapastel),
+                    ))
                   : SingleChildScrollView(
                       scrollDirection: Axis.vertical,
                       child: SingleChildScrollView(
@@ -249,10 +255,8 @@ class _ListScreenState extends State<ListScreen> {
                                       children: [
                                         IconButton(
                                           onPressed: () {
-                                            dbHelper.eliminarPago(e['id']);
-                                            dbHelper.updateEstadoInquil(
-                                                e['iduser'], 'A');
-                                            getFacturas();
+                                            _confirmarDelete(
+                                                e['id'], e['iduser']);
                                           },
                                           icon: SvgPicture.asset(
                                             'assets/icons/borrar.svg',
@@ -262,7 +266,16 @@ class _ListScreenState extends State<ListScreen> {
                                           ),
                                         ),
                                         IconButton(
-                                          onPressed: () {},
+                                          onPressed: () {
+                                            print('hol ${e['id']}');
+                                            Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      UpdatePagoScreen(
+                                                        idPago: e['id'],
+                                                      )),
+                                            );
+                                          },
                                           icon: SvgPicture.asset(
                                             'assets/icons/editar.svg',
                                             color: boton4,
@@ -281,6 +294,40 @@ class _ListScreenState extends State<ListScreen> {
           ]);
         },
       ),
+    );
+  }
+
+  _confirmarDelete(int id, int iduser) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Center(child: Text('¿Esta segura de Borrar?')),
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextButton(
+                  child: const Text('No'),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    dbHelper.eliminarPago(id);
+                    dbHelper.updateEstadoInquil(iduser, 'A');
+                    getFacturas();
+                    Navigator.pop(context);
+                  },
+                  child: const Text('SI'),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
     );
   }
 }

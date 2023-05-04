@@ -4,14 +4,14 @@ import 'package:app_payment/db/data/servicio.dart';
 import 'package:app_payment/db/db_helper.dart';
 import 'package:app_payment/db/models/inquilinos.dart';
 import 'package:app_payment/db/models/pagos.dart';
+import 'package:app_payment/themes/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:marquee/marquee.dart';
 
 class UpdatePagoScreen extends StatefulWidget {
-  
-  final Inquilino user;
-  const UpdatePagoScreen({super.key, required this.user});
+  final int idPago;
+  const UpdatePagoScreen({super.key, required this.idPago});
 
   @override
   State<UpdatePagoScreen> createState() => _UpdatePagoScreenState();
@@ -22,19 +22,14 @@ class _UpdatePagoScreenState extends State<UpdatePagoScreen> {
   late Future<List<Inquilino>> users;
   late DBHelper dbHelper;
   final _formKey = GlobalKey<FormState>();
+  String _monto = '', _descripcion = '', _servicio = '', _fecha = '';
 
   DateTime now = DateTime.now();
-  String formattedDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
-  String formattedTime = DateFormat('kk:mm:ss').format(DateTime.now());
-  DateTime? _fecha;
+  //String formattedDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+  //String formattedTime = DateFormat('kk:mm:ss').format(DateTime.now());
+  //DateTime? _fecha;
   List<dynamic> multipleSelected = [];
-
-  late Future<Map<String, dynamic>> updatepago;
-
-
-  final TextEditingController _montoController = TextEditingController();
-  final TextEditingController _descripcionController = TextEditingController();
-
+  late Pago updatepago;
 
   @override
   void dispose() {
@@ -45,20 +40,14 @@ class _UpdatePagoScreenState extends State<UpdatePagoScreen> {
   void initState() {
     super.initState();
     dbHelper = DBHelper();
-    allPagos();
-    getPago();
+    //getPago();
   }
 
-  allPagos() {
+  /*getPago() {
     setState(() {
-      pagos = dbHelper.getPagos();
+      updatepago = dbHelper.getPagoById(widget.idPago);
     });
-  }
-  getPago() {
-    setState(() {
-      updatepago = dbHelper.getPagoById(widget.user.id!);
-    });
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +55,8 @@ class _UpdatePagoScreenState extends State<UpdatePagoScreen> {
       appBar: AppBar(
         toolbarHeight: 80,
         elevation: 0,
-        backgroundColor: Colors.amberAccent,
+        backgroundColor: barra1,
+        foregroundColor: boton2,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
             bottom: Radius.circular(38.0),
@@ -76,7 +66,11 @@ class _UpdatePagoScreenState extends State<UpdatePagoScreen> {
           height: 50,
           width: MediaQuery.of(context).size.width,
           child: Marquee(
-            text: 'Actualizar el pago de ${widget.user.nombre}',
+            text: 'Actualizar el pago de ',
+            style: const TextStyle(
+              fontFamily: 'Pacifico',
+              color: rosapastel,
+            ),
             pauseAfterRound: const Duration(seconds: 3),
             accelerationDuration: const Duration(seconds: 2),
             accelerationCurve: Curves.linear,
@@ -89,7 +83,34 @@ class _UpdatePagoScreenState extends State<UpdatePagoScreen> {
           ),
         ),
       ),
-      body: Container(
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Text('En Desarrollo', style: TextStyle(
+              fontSize: 25,
+              fontWeight: FontWeight.bold
+            ),),
+            Container(
+              height: 200,
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                image: DecorationImage(
+                  image: AssetImage('assets/work.png'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text('Volver'))
+          ],
+      ),
+      /*
+      Container(
         padding: const EdgeInsets.all(30.0),
         child: SingleChildScrollView(
           child: Form(
@@ -191,14 +212,14 @@ class _UpdatePagoScreenState extends State<UpdatePagoScreen> {
                               : multipleSelected.toString();
                           final fecha = formattedDate; // ?? DateTime.now();
                           final descripcion = _descripcionController.text;
-                          dbHelper.update(Pago(
+                          /*dbHelper.update(Pago(
                             idinquilino: widget.user.id,
                             monto: monto,
                             fecha: fecha.toString(),
                             estado: 'A',
                             servicio: tipo,
                             descripcion: descripcion,
-                          ));
+                          ));*/
                           ScaffoldMessenger.of(context)
                               .showSnackBar(const SnackBar(
                             content: Text('Actualizado'),
@@ -219,10 +240,11 @@ class _UpdatePagoScreenState extends State<UpdatePagoScreen> {
           ),
         ),
       ),
+    */
     );
   }
 
-  _showDatePicker() async {
+  /*_showDatePicker() async {
     final date = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -234,7 +256,7 @@ class _UpdatePagoScreenState extends State<UpdatePagoScreen> {
         _fecha = date;
       });
     }
-  }
+  }*/
 
   _confirmarPrint() {
     showDialog(
@@ -270,5 +292,4 @@ class _UpdatePagoScreenState extends State<UpdatePagoScreen> {
       },
     );
   }
-
 }

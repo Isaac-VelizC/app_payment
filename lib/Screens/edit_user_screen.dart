@@ -16,9 +16,7 @@ class EditUserScreen extends StatefulWidget {
 
 class _EditUserScreenState extends State<EditUserScreen> {
   late DBHelper dbHelper;
-
   final _formKey = GlobalKey<FormState>();
-
   String _nombre = '', _apellido = '', _direccion = '', _telefono = '', _unidad = '';
 
   @override
